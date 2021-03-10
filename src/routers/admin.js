@@ -1,5 +1,6 @@
 const express = require("express");
 const { body } = require("express-validator");
+const { getUsers, getUser } = require("../controllers/admin");
 
 const router = express.Router();
 
@@ -28,11 +29,17 @@ const validators = [
   body("imagesURL").notEmpty(),
 ];
 
-router.get("/users");
+router.get("/users", getUsers);
+
+router.get("/users/:userId", getUser);
 
 router.get("/orders");
 
-router.get("/users");
+router.get("/orders/:orderId");
+
+router.get("/products");
+
+router.get("/products/:productId");
 
 router.post("/product", validators);
 
