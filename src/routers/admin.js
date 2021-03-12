@@ -1,21 +1,23 @@
 const express = require("express");
 const { body } = require("express-validator");
-const { getUsers, getUser } = require("../controllers/admin");
+const {
+  getUsers,
+  getUser,
+  getOrders,
+  getOrder,
+  getProducts,
+  getProduct,
+  addProduct,
+  editProduct,
+  deleteProduct,
+} = require("../controllers/admin");
 
 const router = express.Router();
 
 const validators = [
   body("title").trim().notEmpty(),
   body("price").trim().notEmpty().isFloat(),
-  body("size")
-    .trim()
-    .notEmpty()
-    .custom((value, { req }) => {
-      if (value !== "Large" || value !== "Extra Large") {
-        throw new Error("Size must be a value of: Large or Extra Large");
-      }
-      return true;
-    }),
+  body("size").matches(/\b(?:Large|Extra Large)\b/),
   body("quantity").trim().notEmpty().isDecimal(),
   body("mainNotes").trim().notEmpty(),
   body("scentInspiration").trim().notEmpty(),
@@ -33,18 +35,18 @@ router.get("/users", getUsers);
 
 router.get("/users/:userId", getUser);
 
-router.get("/orders");
+router.get("/orders", getOrders);
 
-router.get("/orders/:orderId");
+router.get("/orders/:orderId", getOrder);
 
-router.get("/products");
+router.get("/products", getProducts);
 
-router.get("/products/:productId");
+router.get("/products/:productId", getProduct);
 
-router.post("/product", validators);
+router.post("/product", validators, addProduct);
 
-router.put("/product/:productId", validators);
+router.put("/product/:productId", validators, editProduct);
 
-router.delete("/product/:productId");
+router.delete("/product/:productId", deleteProduct);
 
 module.exports = router;
