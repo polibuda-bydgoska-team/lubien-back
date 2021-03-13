@@ -8,11 +8,12 @@ const createError = require("../utils/createError");
 
 exports.getUsers = async (req, res, next) => {
   try {
+    const usersNumber = await User.countDocuments({});
     const users = await User.find({}).populate("cart").exec();
     if (!users) {
       throw new Error(errorTypes.NOT_FOUND_ERROR);
     }
-    return res.status(200).send(users);
+    return res.status(200).set("X-Total-Count", usersNumber).send(users);
   } catch (error) {
     next(error);
   }
@@ -24,7 +25,7 @@ exports.getUser = async (req, res, next) => {
     if (!user) {
       throw new Error(errorTypes.NOT_FOUND_ERROR);
     }
-    return res.status(200).send(user);
+    return res.status(200).set("X-Total-Count", "1").send(user);
   } catch (error) {
     next(error);
   }
@@ -32,11 +33,12 @@ exports.getUser = async (req, res, next) => {
 
 exports.getOrders = async (req, res, next) => {
   try {
+    const ordersNumber = await Order.countDocuments({});
     const orders = await Order.find({}).populate("userId").exec();
     if (!orders) {
       throw new Error(errorTypes.NOT_FOUND_ERROR);
     }
-    return res.status(200).send(users);
+    return res.status(200).set("X-Total-Count", ordersNumber).send(users);
   } catch (error) {
     next(error);
   }
@@ -50,7 +52,7 @@ exports.getOrder = async (req, res, next) => {
     if (!order) {
       throw new Error(errorTypes.NOT_FOUND_ERROR);
     }
-    return res.status(200).send(order);
+    return res.status(200).set("X-Total-Count", "1").send(order);
   } catch (error) {
     next(error);
   }
@@ -58,11 +60,12 @@ exports.getOrder = async (req, res, next) => {
 
 exports.getProducts = async (req, res, next) => {
   try {
+    const productsNumber = await Product.countDocuments({});
     const products = await Product.find({});
     if (!products) {
       throw new Error(errorTypes.NOT_FOUND_ERROR);
     }
-    return res.status(200).send(products);
+    return res.status(200).set("X-Total-Count", productsNumber).send(products);
   } catch (error) {
     next(error);
   }
@@ -75,7 +78,7 @@ exports.getProduct = async (req, res, next) => {
     if (!product) {
       throw new Error(errorTypes.NOT_FOUND_ERROR);
     }
-    return res.status(200).send(product);
+    return res.status(200).set("X-Total-Count", "1").send(product);
   } catch (error) {
     next(error);
   }
