@@ -1,8 +1,12 @@
 const express = require("express");
 const { body } = require("express-validator");
+
 const User = require("../models/user");
+const { signup, login } = require("../controllers/auth");
 
 const router = express.Router();
+
+module.exports = router;
 
 const validators = [
   body("email")
@@ -21,10 +25,18 @@ const validators = [
     "Password must contains minimum 8 characters, at least one uppercase letter, one lowercase letter and one number"
   )
     .trim()
-    .isLength({ min: 8 })
-    .matches(
-      "^(?=.*[a-z])(?=.*[A-Z])(?=.*d)(?=.*[@$!%*?&])[A-Za-zd@$!%*?&]{8,}$"
-    ),
+    .isLength({ min: 8 }),
+  // .matches(
+  //   "^(?=.*[a-z])(?=.*[A-Z])(?=.*d)(?=.*[@$!%*?&])[A-Za-zd@$!%*?&]{8,}$"
+  // ),
+  body("confirmPassword")
+    .trim()
+    .custom((value, { req }) => {
+      if (value !== req.body.password) {
+        throw new Error("Passwords have to match!");
+      }
+      return true;
+    }),
   body("phone").trim().notEmpty().isMobilePhone(),
   body("firstName").trim().notEmpty(),
   body("lastName").trim().notEmpty(),
@@ -34,21 +46,8 @@ const validators = [
   body("addressAditionalInfo").trim(),
   body("city").trim(),
   body("county").trim(),
-  body("postCode").trim().isPostalCode(),
+  body("postCode").trim(),
 ];
 
-router.get("/cart");
-
-router.post("/cart");
-
-router.post("/cart-delete-item");
-
-router.get("/orders");
-
-router.get("/orders/:orderId");
-
-router.get("/user-details/:userId");
-
-router.put("/user-details/:userId", validators);
-
-module.exports = router;
+router.put("/signup", validators, signup);
+router.post("/login", login);
