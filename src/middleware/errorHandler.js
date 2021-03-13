@@ -18,6 +18,7 @@ const errorHandler = (error, req, res, next) => {
       return res.status(500).send({
         message:
           "Something went wrong on our server side. Please try again in a moment.",
+        details: error.message,
       });
   }
 };
