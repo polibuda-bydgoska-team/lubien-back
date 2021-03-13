@@ -13,7 +13,11 @@ exports.getUsers = async (req, res, next) => {
     if (!users) {
       throw new Error(errorTypes.NOT_FOUND_ERROR);
     }
-    return res.status(200).set("X-Total-Count", usersNumber).send(users);
+    return res
+      .status(200)
+      .set("X-Total-Count", usersNumber)
+      .set("Access-Control-Expose-Headers", "X-Total-Count")
+      .send(users);
   } catch (error) {
     next(error);
   }
@@ -25,7 +29,11 @@ exports.getUser = async (req, res, next) => {
     if (!user) {
       throw new Error(errorTypes.NOT_FOUND_ERROR);
     }
-    return res.status(200).set("X-Total-Count", "1").send(user);
+    return res
+      .status(200)
+      .set("X-Total-Count", "1")
+      .set("Access-Control-Expose-Headers", "X-Total-Count")
+      .send(user);
   } catch (error) {
     next(error);
   }
@@ -38,7 +46,11 @@ exports.getOrders = async (req, res, next) => {
     if (!orders) {
       throw new Error(errorTypes.NOT_FOUND_ERROR);
     }
-    return res.status(200).set("X-Total-Count", ordersNumber).send(users);
+    return res
+      .status(200)
+      .set("X-Total-Count", ordersNumber)
+      .set("Access-Control-Expose-Headers", "X-Total-Count")
+      .send(users);
   } catch (error) {
     next(error);
   }
@@ -52,7 +64,11 @@ exports.getOrder = async (req, res, next) => {
     if (!order) {
       throw new Error(errorTypes.NOT_FOUND_ERROR);
     }
-    return res.status(200).set("X-Total-Count", "1").send(order);
+    return res
+      .status(200)
+      .set("X-Total-Count", "1")
+      .set("Access-Control-Expose-Headers", "X-Total-Count")
+      .send(order);
   } catch (error) {
     next(error);
   }
@@ -65,7 +81,11 @@ exports.getProducts = async (req, res, next) => {
     if (!products) {
       throw new Error(errorTypes.NOT_FOUND_ERROR);
     }
-    return res.status(200).set("X-Total-Count", productsNumber).send(products);
+    return res
+      .status(200)
+      .set("X-Total-Count", productsNumber)
+      .set("Access-Control-Expose-Headers", "X-Total-Count")
+      .send(products);
   } catch (error) {
     next(error);
   }
@@ -78,7 +98,11 @@ exports.getProduct = async (req, res, next) => {
     if (!product) {
       throw new Error(errorTypes.NOT_FOUND_ERROR);
     }
-    return res.status(200).set("X-Total-Count", "1").send(product);
+    return res
+      .status(200)
+      .set("X-Total-Count", "1")
+      .set("Access-Control-Expose-Headers", "X-Total-Count")
+      .send(product);
   } catch (error) {
     next(error);
   }
