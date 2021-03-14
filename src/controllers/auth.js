@@ -50,13 +50,23 @@ exports.signup = async (req, res, next) => {
 
     await user.save();
 
-    const userToken = jwt.sign(
+    console.log(req.expirationDate);
+
+    const token = jwt.sign(
       { userId: user._id },
       process.env.JWT_SECRET,
       authConfig
     );
 
-    return res.status(201).send({ token: userToken });
+    const decodedToken = jwt.decode(token, { complete: true });
+    const expirationDateInJWT = decodedToken.payload.exp;
+    const expirationDate = new Date(expirationDateInJWT * 1000);
+
+    return res.status(201).send({
+      token: token,
+      expirationDate: expirationDate,
+      userId: user._id.toString(),
+    });
   } catch (error) {
     next(error);
   }
@@ -84,11 +94,14 @@ exports.login = async (req, res, next) => {
       authConfig
     );
 
+    const decodedToken = jwt.decode(token, { complete: true });
+    const expirationDateInJWT = decodedToken.payload.exp;
+    const expirationDate = new Date(expirationDateInJWT * 1000);
+
     res.status(200).send({
       token: token,
-      expiresIn: process.env.TOKEN_EXPIRES_IN,
+      expirationDate: expirationDate,
       userId: foundUser._id.toString(),
-      email: foundUser.email,
     });
   } catch (error) {
     next(error);
