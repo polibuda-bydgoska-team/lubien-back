@@ -1,5 +1,4 @@
 const { validationResult } = require("express-validator");
-const errorTypes = require("../config/errorTypes");
 const createError = require("../utils/createError");
 const validateUpdates = require("../utils/validateUpdates");
 const bcrypt = require("bcryptjs");
@@ -8,50 +7,52 @@ const authConfig = require("../config/auth");
 const User = require("../models/user");
 
 exports.signup = async (req, res, next) => {
-  const validationErrors = validationResult(req);
-  if (!validationErrors.isEmpty()) {
-    throw createError(errorTypes.INVALID_REQUEST, {
-      message: "Validation failed, entered data is incorrect.",
-      errors: validationErrors.array(),
-    });
-  }
-
-  const updates = Object.keys(req.body);
-  const allowedUpdates = [
-    "email",
-    "password",
-    "phone",
-    "firstName",
-    "lastName",
-    "companyName",
-    "street",
-    "houseNumber",
-    "addressAditionalInfo",
-    "city",
-    "county",
-    "postCode",
-  ];
-  const areUpdatesValid = validateUpdates(updates, allowedUpdates);
-  if (!areUpdatesValid.isOperationValid) {
-    throw new Error(errorTypes.INVALID_REQUEST);
-  }
-
-  const {
-    email,
-    password,
-    phone,
-    firstName,
-    lastName,
-    companyName,
-    street,
-    houseNumber,
-    addressAditionalInfo,
-    city,
-    county,
-    postCode,
-  } = req.body;
-
   try {
+    const validationErrors = validationResult(req);
+    if (!validationErrors.isEmpty()) {
+      createError(
+        "Validation failed, entered data is incorrect.",
+        422,
+        validationErrors.array()
+      );
+    }
+
+    const updates = Object.keys(req.body);
+    const allowedUpdates = [
+      "email",
+      "password",
+      "confirmPassword",
+      "phone",
+      "firstName",
+      "lastName",
+      "companyName",
+      "street",
+      "houseNumber",
+      "addressAditionalInfo",
+      "city",
+      "county",
+      "postCode",
+    ];
+    const areUpdatesValid = validateUpdates(updates, allowedUpdates);
+    if (!areUpdatesValid.isOperationValid) {
+      createError("Can't updates this fields", 422);
+    }
+
+    const {
+      email,
+      password,
+      phone,
+      firstName,
+      lastName,
+      companyName,
+      street,
+      houseNumber,
+      addressAditionalInfo,
+      city,
+      county,
+      postCode,
+    } = req.body;
+
     const hashedPwd = await bcrypt.hash(password, 12);
     const user = new User({
       email,
@@ -88,32 +89,32 @@ exports.signup = async (req, res, next) => {
       userId: user._id.toString(),
     });
   } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
     next(error);
   }
 };
 
 exports.login = async (req, res, next) => {
-  const updates = Object.keys(req.body);
-  const allowedUpdates = ["email", "password"];
-  const areUpdatesValid = validateUpdates(updates, allowedUpdates);
-  if (!areUpdatesValid.isOperationValid) {
-    throw new Error(errorTypes.INVALID_REQUEST);
-  }
-
-  const { email, password } = req.body;
-
   try {
+    const updates = Object.keys(req.body);
+    const allowedUpdates = ["email", "password"];
+    const areUpdatesValid = validateUpdates(updates, allowedUpdates);
+    if (!areUpdatesValid.isOperationValid) {
+      createError("Can't updates this fields", 422);
+    }
+
+    const { email, password } = req.body;
+
     const foundUser = await User.findOne({ email });
     if (!foundUser) {
-      throw createError(
-        errorTypes.INVALID_REQUEST,
-        "A user with this email could not be found"
-      );
+      createError("No user found with this email", 404);
     }
 
     const isPasswordValid = await bcrypt.compare(password, foundUser.password);
     if (!isPasswordValid) {
-      throw createError(errorTypes.INVALID_REQUEST, "Wrong password.");
+      createError("Wrong password", 400);
     }
 
     const token = jwt.sign(
@@ -133,6 +134,9 @@ exports.login = async (req, res, next) => {
       userRole: foundUser.role,
     });
   } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
     next(error);
   }
 };

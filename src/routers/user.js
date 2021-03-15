@@ -1,6 +1,7 @@
 const express = require("express");
 const { body } = require("express-validator");
 const User = require("../models/user");
+const isAuth = require("../middleware/isAuth");
 
 const router = express.Router();
 
@@ -43,12 +44,12 @@ router.post("/cart");
 
 router.post("/cart-delete-item");
 
-router.get("/orders");
+router.get("/orders", isAuth);
 
-router.get("/orders/:orderId");
+router.get("/orders/:orderId", isAuth);
 
-router.get("/user-details/:userId");
+router.get("/user-details/:userId", isAuth);
 
-router.put("/user-details/:userId", validators);
+router.put("/user-details/:userId", validators, isAuth);
 
 module.exports = router;

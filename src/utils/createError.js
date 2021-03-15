@@ -1,7 +1,8 @@
-const createError = (type, payload) => {
-  const error = new Error(type);
-  error.details = payload;
-  return error;
+const createError = (message, statusCode, data) => {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  error.data = data;
+  throw error;
 };
 
 module.exports = createError;

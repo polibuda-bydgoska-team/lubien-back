@@ -35,20 +35,20 @@ const validators = [
 
 router.get("/users", isAuth, isAdminAuth, getUsers);
 
-router.get("/users/:userId", getUser);
+router.get("/users/:userId", isAuth, isAdminAuth, getUser);
 
-router.get("/orders", getOrders);
+router.get("/orders", isAuth, isAdminAuth, getOrders);
 
-router.get("/orders/:orderId", getOrder);
+router.get("/orders/:orderId", isAuth, isAdminAuth, getOrder);
 
-router.get("/products", isAuth, getProducts);
+router.get("/products", isAuth, isAdminAuth, getProducts);
 
-router.get("/products/:productId", getProduct);
+router.get("/products/:productId", isAuth, isAdminAuth, getProduct);
 
-router.post("/product", validators, addProduct);
+router.post("/product", validators, isAuth, isAdminAuth, addProduct);
 
-router.put("/product/:productId", validators, editProduct);
+router.put("/product/:productId", validators, isAuth, isAdminAuth, editProduct);
 
-router.delete("/product/:productId", deleteProduct);
+router.delete("/product/:productId", isAuth, isAdminAuth, deleteProduct);
 
 module.exports = router;
