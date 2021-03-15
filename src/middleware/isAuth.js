@@ -14,6 +14,7 @@ module.exports = (req, res, next) => {
     if (!decodedToken) {
       throw new Error("Not authenticated. Error when decodning token");
     }
+
     req.userId = decodedToken.userId;
     req.isAuthenticated = true;
     next();

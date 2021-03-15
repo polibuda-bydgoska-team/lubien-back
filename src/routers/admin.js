@@ -11,6 +11,8 @@ const {
   editProduct,
   deleteProduct,
 } = require("../controllers/admin");
+const isAuth = require("../middleware/isAuth");
+const isAdminAuth = require("../middleware/isAdminAuth");
 
 const router = express.Router();
 
@@ -31,7 +33,7 @@ const validators = [
   body("imagesURL").notEmpty(),
 ];
 
-router.get("/users", getUsers);
+router.get("/users", isAuth, isAdminAuth, getUsers);
 
 router.get("/users/:userId", getUser);
 
@@ -39,7 +41,7 @@ router.get("/orders", getOrders);
 
 router.get("/orders/:orderId", getOrder);
 
-router.get("/products", getProducts);
+router.get("/products", isAuth, getProducts);
 
 router.get("/products/:productId", getProduct);
 

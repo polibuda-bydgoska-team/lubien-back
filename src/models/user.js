@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 
+const ROLE = require("../config/userRoles");
+
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -63,7 +65,7 @@ const userSchema = new mongoose.Schema({
       },
     ],
   },
-  role: { type: String, default: "basic" },
+  role: { type: String, default: ROLE.BASIC },
 });
 
 module.exports = mongoose.model("User", userSchema);
