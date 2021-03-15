@@ -3,7 +3,6 @@ const Product = require("../models/product");
 const Order = require("../models/order");
 const { validationResult } = require("express-validator/check");
 const validateUpdates = require("../utils/validateUpdates");
-const errorTypes = require("../config/errorTypes");
 const createError = require("../utils/createError");
 
 exports.getUsers = async (req, res, next) => {
@@ -11,10 +10,13 @@ exports.getUsers = async (req, res, next) => {
     const usersNumber = await User.countDocuments({});
     const users = await User.find({}).populate("cart").exec();
     if (!users) {
-      throw new Error(errorTypes.NOT_FOUND_ERROR);
+      createError("Could not find users", 404);
     }
     return res.status(200).set("X-Total-Count", usersNumber).send(users);
   } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
     next(error);
   }
 };
@@ -23,10 +25,13 @@ exports.getUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.userId).populate("cart").exec();
     if (!user) {
-      throw new Error(errorTypes.NOT_FOUND_ERROR);
+      createError("Could not find user", 404);
     }
     return res.status(200).set("X-Total-Count", "1").send(user);
   } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
     next(error);
   }
 };
@@ -36,10 +41,13 @@ exports.getOrders = async (req, res, next) => {
     const ordersNumber = await Order.countDocuments({});
     const orders = await Order.find({}).populate("userId").exec();
     if (!orders) {
-      throw new Error(errorTypes.NOT_FOUND_ERROR);
+      createError("Could not find orders", 404);
     }
     return res.status(200).set("X-Total-Count", ordersNumber).send(users);
   } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
     next(error);
   }
 };
@@ -50,10 +58,13 @@ exports.getOrder = async (req, res, next) => {
       .populate("userId")
       .exec();
     if (!order) {
-      throw new Error(errorTypes.NOT_FOUND_ERROR);
+      createError("Could not find order", 404);
     }
     return res.status(200).set("X-Total-Count", "1").send(order);
   } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
     next(error);
   }
 };
@@ -63,10 +74,13 @@ exports.getProducts = async (req, res, next) => {
     const productsNumber = await Product.countDocuments({});
     const products = await Product.find({});
     if (!products) {
-      throw new Error(errorTypes.NOT_FOUND_ERROR);
+      createError("Could not find products", 404);
     }
     return res.status(200).set("X-Total-Count", productsNumber).send(products);
   } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
     next(error);
   }
 };
@@ -76,10 +90,13 @@ exports.getProduct = async (req, res, next) => {
     const product = await Product.findById(req.params.productId);
 
     if (!product) {
-      throw new Error(errorTypes.NOT_FOUND_ERROR);
+      createError("Could not find product", 404);
     }
     return res.status(200).set("X-Total-Count", "1").send(product);
   } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
     next(error);
   }
 };
@@ -87,10 +104,7 @@ exports.getProduct = async (req, res, next) => {
 exports.addProduct = async (req, res, next) => {
   const validationErrors = validationResult(req);
   if (!validationErrors.isEmpty()) {
-    throw createError(errorTypes.INVALID_REQUEST, {
-      message: "Validation failed, entered data is incorrect.",
-      errors: validationErrors.array(),
-    });
+    createError("Validation failed, entered data is incorrect.", 422);
   }
 
   // if (!req.files) {
@@ -141,6 +155,9 @@ exports.addProduct = async (req, res, next) => {
       product: product,
     });
   } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
     next(error);
   }
 };
@@ -148,10 +165,7 @@ exports.addProduct = async (req, res, next) => {
 exports.editProduct = async (req, res, next) => {
   const validationErrors = validationResult(req);
   if (!validationErrors.isEmpty()) {
-    throw createError(errorTypes.INVALID_REQUEST, {
-      message: "Validation failed, entered data is incorrect.",
-      errors: validationErrors.array(),
-    });
+    createError("Validation failed, entered data is incorrect.", 422);
   }
 
   const updates = Object.keys(req.body);
@@ -173,7 +187,7 @@ exports.editProduct = async (req, res, next) => {
   ];
   const areUpdatesValid = validateUpdates(updates, allowedUpdates);
   if (!areUpdatesValid.isOperationValid) {
-    throw new Error(errorTypes.INVALID_REQUEST);
+    createError("Can't updates this fields", 422);
   }
 
   // let imagesURL = req.body.imagesURL;
@@ -196,7 +210,7 @@ exports.editProduct = async (req, res, next) => {
     );
 
     if (!product) {
-      throw new Error(errorTypes.NOT_FOUND_ERROR);
+      createError("Could not find product", 404);
     }
 
     return res.status(200).send({
@@ -204,6 +218,9 @@ exports.editProduct = async (req, res, next) => {
       product: product,
     });
   } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
     next(error);
   }
 };
@@ -213,7 +230,7 @@ exports.deleteProduct = async (req, res, next) => {
     const product = await Product.findByIdAndDelete(req.params.productId);
 
     if (!product) {
-      throw new Error(errorTypes.NOT_FOUND_ERROR);
+      createError("Could not find product", 404);
     }
 
     return res.status(200).send({
@@ -221,6 +238,9 @@ exports.deleteProduct = async (req, res, next) => {
       deletedProduct: product,
     });
   } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
     next(error);
   }
 };

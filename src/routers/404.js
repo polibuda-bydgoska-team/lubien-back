@@ -1,8 +1,8 @@
 const express = require("express");
-const errorTypes = require("../config/errorTypes");
+const createError = require("../utils/createError");
 const router = express.Router();
 
 router.use("*", (req, res, next) => {
-  throw new Error(errorTypes.NOT_FOUND_ERROR);
+  createError("Not found", 404);
 });
 module.exports = router;

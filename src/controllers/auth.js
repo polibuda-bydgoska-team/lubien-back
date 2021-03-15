@@ -1,5 +1,4 @@
 const { validationResult } = require("express-validator");
-const errorTypes = require("../config/errorTypes");
 const createError = require("../utils/createError");
 const validateUpdates = require("../utils/validateUpdates");
 const bcrypt = require("bcryptjs");
@@ -10,16 +9,18 @@ const User = require("../models/user");
 exports.signup = async (req, res, next) => {
   const validationErrors = validationResult(req);
   if (!validationErrors.isEmpty()) {
-    throw createError(errorTypes.INVALID_REQUEST, {
-      message: "Validation failed, entered data is incorrect.",
-      errors: validationErrors.array(),
-    });
+    createError(
+      "Validation failed, entered data is incorrect.",
+      422,
+      validationErrors.array()
+    );
   }
 
   const updates = Object.keys(req.body);
   const allowedUpdates = [
     "email",
     "password",
+    "confirmPassword",
     "phone",
     "firstName",
     "lastName",
@@ -33,7 +34,7 @@ exports.signup = async (req, res, next) => {
   ];
   const areUpdatesValid = validateUpdates(updates, allowedUpdates);
   if (!areUpdatesValid.isOperationValid) {
-    throw new Error(errorTypes.INVALID_REQUEST);
+    createError("Can't updates this fields", 422);
   }
 
   const {
@@ -88,6 +89,9 @@ exports.signup = async (req, res, next) => {
       userId: user._id.toString(),
     });
   } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
     next(error);
   }
 };
@@ -97,7 +101,7 @@ exports.login = async (req, res, next) => {
   const allowedUpdates = ["email", "password"];
   const areUpdatesValid = validateUpdates(updates, allowedUpdates);
   if (!areUpdatesValid.isOperationValid) {
-    throw new Error(errorTypes.INVALID_REQUEST);
+    createError("Can't updates this fields", 422);
   }
 
   const { email, password } = req.body;
@@ -105,15 +109,12 @@ exports.login = async (req, res, next) => {
   try {
     const foundUser = await User.findOne({ email });
     if (!foundUser) {
-      throw createError(
-        errorTypes.INVALID_REQUEST,
-        "A user with this email could not be found"
-      );
+      createError("No user found with this email", 404);
     }
 
     const isPasswordValid = await bcrypt.compare(password, foundUser.password);
     if (!isPasswordValid) {
-      throw createError(errorTypes.INVALID_REQUEST, "Wrong password.");
+      createError("Wrong password", 400);
     }
 
     const token = jwt.sign(
@@ -133,6 +134,9 @@ exports.login = async (req, res, next) => {
       userRole: foundUser.role,
     });
   } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
     next(error);
   }
 };
