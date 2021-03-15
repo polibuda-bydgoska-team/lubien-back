@@ -102,53 +102,53 @@ exports.getProduct = async (req, res, next) => {
 };
 
 exports.addProduct = async (req, res, next) => {
-  const validationErrors = validationResult(req);
-  if (!validationErrors.isEmpty()) {
-    createError("Validation failed, entered data is incorrect.", 422);
-  }
-
-  // if (!req.files) {
-  //   throw createError(errorTypes.INVALID_REQUEST, {
-  //     message: "No images provided.",
-  //   });
-  // }
-  // const imagesURL = req.files.path.replace("\\", "/");
-
-  const {
-    title,
-    price,
-    size,
-    quantity,
-    mainNotes,
-    scentInspiration,
-    location,
-    scentProfile,
-    topNotes,
-    heartNotes,
-    baseNotes,
-    description,
-    seriesName,
-    imagesURL,
-  } = req.body;
-
-  const product = new Product({
-    title,
-    price,
-    size,
-    quantity,
-    mainNotes,
-    scentInspiration,
-    location,
-    scentProfile,
-    topNotes,
-    heartNotes,
-    baseNotes,
-    description,
-    seriesName,
-    imagesURL,
-  });
-
   try {
+    const validationErrors = validationResult(req);
+    if (!validationErrors.isEmpty()) {
+      createError("Validation failed, entered data is incorrect.", 422);
+    }
+
+    // if (!req.files) {
+    //   throw createError(errorTypes.INVALID_REQUEST, {
+    //     message: "No images provided.",
+    //   });
+    // }
+    // const imagesURL = req.files.path.replace("\\", "/");
+
+    const {
+      title,
+      price,
+      size,
+      quantity,
+      mainNotes,
+      scentInspiration,
+      location,
+      scentProfile,
+      topNotes,
+      heartNotes,
+      baseNotes,
+      description,
+      seriesName,
+      imagesURL,
+    } = req.body;
+
+    const product = new Product({
+      title,
+      price,
+      size,
+      quantity,
+      mainNotes,
+      scentInspiration,
+      location,
+      scentProfile,
+      topNotes,
+      heartNotes,
+      baseNotes,
+      description,
+      seriesName,
+      imagesURL,
+    });
+
     await product.save();
     return res.status(201).send({
       message: "Product added succesfully.",
@@ -163,44 +163,44 @@ exports.addProduct = async (req, res, next) => {
 };
 
 exports.editProduct = async (req, res, next) => {
-  const validationErrors = validationResult(req);
-  if (!validationErrors.isEmpty()) {
-    createError("Validation failed, entered data is incorrect.", 422);
-  }
-
-  const updates = Object.keys(req.body);
-  const allowedUpdates = [
-    "title",
-    "price",
-    "size",
-    "quantity",
-    "mainNotes",
-    "scentInspiration",
-    "location",
-    "scentProfile",
-    "topNotes",
-    "heartNotes",
-    "baseNotes",
-    "description",
-    "seriesName",
-    "imagesURL",
-  ];
-  const areUpdatesValid = validateUpdates(updates, allowedUpdates);
-  if (!areUpdatesValid.isOperationValid) {
-    createError("Can't updates this fields", 422);
-  }
-
-  // let imagesURL = req.body.imagesURL;
-  // if (req.files) {
-  //   imagesURL = req.file.path.replace("\\", "/");
-  // }
-  // if (!imagesURL) {
-  //   throw createError(errorTypes.INVALID_REQUEST, {
-  //     message: "No images provided.",
-  //   });
-  // }
-
   try {
+    const validationErrors = validationResult(req);
+    if (!validationErrors.isEmpty()) {
+      createError("Validation failed, entered data is incorrect.", 422);
+    }
+
+    const updates = Object.keys(req.body);
+    const allowedUpdates = [
+      "title",
+      "price",
+      "size",
+      "quantity",
+      "mainNotes",
+      "scentInspiration",
+      "location",
+      "scentProfile",
+      "topNotes",
+      "heartNotes",
+      "baseNotes",
+      "description",
+      "seriesName",
+      "imagesURL",
+    ];
+    const areUpdatesValid = validateUpdates(updates, allowedUpdates);
+    if (!areUpdatesValid.isOperationValid) {
+      createError("Can't updates this fields", 422);
+    }
+
+    // let imagesURL = req.body.imagesURL;
+    // if (req.files) {
+    //   imagesURL = req.file.path.replace("\\", "/");
+    // }
+    // if (!imagesURL) {
+    //   throw createError(errorTypes.INVALID_REQUEST, {
+    //     message: "No images provided.",
+    //   });
+    // }
+
     const product = await Product.findByIdAndUpdate(
       req.params.productId,
       req.body,

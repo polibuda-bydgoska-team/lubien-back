@@ -7,52 +7,52 @@ const authConfig = require("../config/auth");
 const User = require("../models/user");
 
 exports.signup = async (req, res, next) => {
-  const validationErrors = validationResult(req);
-  if (!validationErrors.isEmpty()) {
-    createError(
-      "Validation failed, entered data is incorrect.",
-      422,
-      validationErrors.array()
-    );
-  }
-
-  const updates = Object.keys(req.body);
-  const allowedUpdates = [
-    "email",
-    "password",
-    "confirmPassword",
-    "phone",
-    "firstName",
-    "lastName",
-    "companyName",
-    "street",
-    "houseNumber",
-    "addressAditionalInfo",
-    "city",
-    "county",
-    "postCode",
-  ];
-  const areUpdatesValid = validateUpdates(updates, allowedUpdates);
-  if (!areUpdatesValid.isOperationValid) {
-    createError("Can't updates this fields", 422);
-  }
-
-  const {
-    email,
-    password,
-    phone,
-    firstName,
-    lastName,
-    companyName,
-    street,
-    houseNumber,
-    addressAditionalInfo,
-    city,
-    county,
-    postCode,
-  } = req.body;
-
   try {
+    const validationErrors = validationResult(req);
+    if (!validationErrors.isEmpty()) {
+      createError(
+        "Validation failed, entered data is incorrect.",
+        422,
+        validationErrors.array()
+      );
+    }
+
+    const updates = Object.keys(req.body);
+    const allowedUpdates = [
+      "email",
+      "password",
+      "confirmPassword",
+      "phone",
+      "firstName",
+      "lastName",
+      "companyName",
+      "street",
+      "houseNumber",
+      "addressAditionalInfo",
+      "city",
+      "county",
+      "postCode",
+    ];
+    const areUpdatesValid = validateUpdates(updates, allowedUpdates);
+    if (!areUpdatesValid.isOperationValid) {
+      createError("Can't updates this fields", 422);
+    }
+
+    const {
+      email,
+      password,
+      phone,
+      firstName,
+      lastName,
+      companyName,
+      street,
+      houseNumber,
+      addressAditionalInfo,
+      city,
+      county,
+      postCode,
+    } = req.body;
+
     const hashedPwd = await bcrypt.hash(password, 12);
     const user = new User({
       email,
@@ -97,16 +97,16 @@ exports.signup = async (req, res, next) => {
 };
 
 exports.login = async (req, res, next) => {
-  const updates = Object.keys(req.body);
-  const allowedUpdates = ["email", "password"];
-  const areUpdatesValid = validateUpdates(updates, allowedUpdates);
-  if (!areUpdatesValid.isOperationValid) {
-    createError("Can't updates this fields", 422);
-  }
-
-  const { email, password } = req.body;
-
   try {
+    const updates = Object.keys(req.body);
+    const allowedUpdates = ["email", "password"];
+    const areUpdatesValid = validateUpdates(updates, allowedUpdates);
+    if (!areUpdatesValid.isOperationValid) {
+      createError("Can't updates this fields", 422);
+    }
+
+    const { email, password } = req.body;
+
     const foundUser = await User.findOne({ email });
     if (!foundUser) {
       createError("No user found with this email", 404);
