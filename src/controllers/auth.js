@@ -1,6 +1,7 @@
 const { validationResult } = require("express-validator");
 const errorTypes = require("../config/errorTypes");
 const createError = require("../utils/createError");
+const validateUpdates = require("../utils/validateUpdates");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const authConfig = require("../config/auth");
@@ -14,6 +15,27 @@ exports.signup = async (req, res, next) => {
       errors: validationErrors.array(),
     });
   }
+
+  const updates = Object.keys(req.body);
+  const allowedUpdates = [
+    "email",
+    "password",
+    "phone",
+    "firstName",
+    "lastName",
+    "companyName",
+    "street",
+    "houseNumber",
+    "addressAditionalInfo",
+    "city",
+    "county",
+    "postCode",
+  ];
+  const areUpdatesValid = validateUpdates(updates, allowedUpdates);
+  if (!areUpdatesValid.isOperationValid) {
+    throw new Error(errorTypes.INVALID_REQUEST);
+  }
+
   const {
     email,
     password,
@@ -50,8 +72,6 @@ exports.signup = async (req, res, next) => {
 
     await user.save();
 
-    console.log(req.expirationDate);
-
     const token = jwt.sign(
       { userId: user._id },
       process.env.JWT_SECRET,
@@ -73,7 +93,15 @@ exports.signup = async (req, res, next) => {
 };
 
 exports.login = async (req, res, next) => {
+  const updates = Object.keys(req.body);
+  const allowedUpdates = ["email", "password"];
+  const areUpdatesValid = validateUpdates(updates, allowedUpdates);
+  if (!areUpdatesValid.isOperationValid) {
+    throw new Error(errorTypes.INVALID_REQUEST);
+  }
+
   const { email, password } = req.body;
+
   try {
     const foundUser = await User.findOne({ email });
     if (!foundUser) {
@@ -102,6 +130,7 @@ exports.login = async (req, res, next) => {
       token: token,
       expirationDate: expirationDate,
       userId: foundUser._id.toString(),
+      userRole: foundUser.role,
     });
   } catch (error) {
     next(error);
