@@ -11,7 +11,8 @@
   "author": "Adrian Wysocki, Maciej Zendarski & Karol Cieslewicz",
   "license": "ISC",
   "devDependencies": {
-    "nodemon": "^2.0.7"
+    "nodemon": "^2.0.7",
+    "prettier": "^2.2.1"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -22,6 +23,7 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.11.19",
     "multer": "^1.4.2",
+    "stripe": "^8.138.0",
     "uuid": "^8.3.2"
   }
 }
