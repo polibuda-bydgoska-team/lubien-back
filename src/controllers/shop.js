@@ -37,7 +37,9 @@ exports.getProduct = async (req, res, next) => {
 
 exports.getCheckout = async (req, res, next) => {
   try {
-    const user = await User.findById(req.userId).populate("cart.items.productId").exec();
+    const user = await User.findById(req.userId)
+      .populate("cart.items.productId")
+      .exec();
     const products = user.cart.items;
 
     const session = await stripe.checkout.sessions.create({
@@ -74,7 +76,7 @@ exports.webhook = async (req, res, next) => {
       case checkout.session.completed:
         const userIdinString = event.data.object.client_reference_id;
         const userId = mongoose.Types.ObjectId(userIdinString);
-        checkoutSessionCompleted(userId)
+        checkoutSessionCompleted(userId);
         break;
       default:
         console.log(`Unhandled event type ${event.type}.`);
@@ -89,29 +91,31 @@ exports.webhook = async (req, res, next) => {
   }
 };
 
-const checkoutSessionCompleted = (userId) => {
-    try {
-        const user = await User.findById(userId).populate("cart.items.productId").execPopulate();
-        let total = 0;
-        products = user.cart.items;
-        products.forEach((p) => {
-        total += p.quantity * p.productId.price;
-      });
-      const productsToOrder = user.cart.items.map((i) => {
-        return { quantity: i.quantity, product: { ...i.productId._doc } };
-      });
-      const order = new Order({
-        products: productsToOrder,
-        totalPrice: total,
-        user: {
-          email: user.email,
-          address: user.address,
-          userId: user._id,
-        },
-      });
-      await order.save();
-      user.clearCart();
-    } catch (error) {
-        console.log(error)
-    }
+const checkoutSessionCompleted = async (userId) => {
+  try {
+    const user = await User.findById(userId)
+      .populate("cart.items.productId")
+      .execPopulate();
+    let total = 0;
+    products = user.cart.items;
+    products.forEach((p) => {
+      total += p.quantity * p.productId.price;
+    });
+    const productsToOrder = user.cart.items.map((i) => {
+      return { quantity: i.quantity, product: { ...i.productId._doc } };
+    });
+    const order = new Order({
+      products: productsToOrder,
+      totalPrice: total,
+      user: {
+        email: user.email,
+        address: user.address,
+        userId: user._id,
+      },
+    });
+    await order.save();
+    user.clearCart();
+  } catch (error) {
+    console.log(error);
+  }
 };
