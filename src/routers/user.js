@@ -38,11 +38,11 @@ const validators = [
   body("postCode").trim().isPostalCode(),
 ];
 
-router.get("/cart");
+router.get("/cart", isAuth);
 
-router.post("/cart");
+router.post("/cart", isAuth);
 
-router.post("/cart-delete-item");
+router.post("/cart-delete-item", isAuth);
 
 router.get("/orders", isAuth);
 
