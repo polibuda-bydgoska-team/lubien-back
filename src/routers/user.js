@@ -2,30 +2,20 @@ const express = require("express");
 const { body } = require("express-validator");
 const User = require("../models/user");
 const isAuth = require("../middleware/isAuth");
+const {
+  getCart,
+  postCart,
+  postCartDeleteItem,
+  getOrders,
+  getOrder,
+  getUserDetails,
+  putEditUserDetails,
+  putEditEmail,
+} = require("../controllers/user");
 
 const router = express.Router();
 
-const validators = [
-  body("email")
-    .isEmail()
-    .withMessage("Please enter a valid email.")
-    .custom((value, { req }) => {
-      return User.findOne({ email: value }).then((userDoc) => {
-        if (userDoc) {
-          return Promise.reject("E-mail address already exists!");
-        }
-      });
-    })
-    .normalizeEmail(),
-  body(
-    "password",
-    "Password must contains minimum 8 characters, at least one uppercase letter, one lowercase letter and one number"
-  )
-    .trim()
-    .isLength({ min: 8 })
-    .matches(
-      "^(?=.*[a-z])(?=.*[A-Z])(?=.*d)(?=.*[@$!%*?&])[A-Za-zd@$!%*?&]{8,}$"
-    ),
+const validatorsUserDetails = [
   body("phone").trim().notEmpty().isMobilePhone(),
   body("firstName").trim().notEmpty(),
   body("lastName").trim().notEmpty(),
@@ -35,21 +25,35 @@ const validators = [
   body("addressAditionalInfo").trim(),
   body("city").trim(),
   body("county").trim(),
-  body("postCode").trim().isPostalCode(),
+  body("postCode").trim(),
 ];
 
-router.get("/cart", isAuth);
+const emailValidator = body("email")
+  .isEmail()
+  .withMessage("Please enter a valid email.")
+  .custom((value, { req }) => {
+    return User.findOne({ email: value }).then((userDoc) => {
+      if (userDoc) {
+        return Promise.reject("E-mail address already exists!");
+      }
+    });
+  })
+  .normalizeEmail();
 
-router.post("/cart", isAuth);
+router.get("/cart", isAuth, getCart);
 
-router.post("/cart-delete-item", isAuth);
+router.post("/cart", isAuth, postCart);
 
-router.get("/orders", isAuth);
+router.post("/cart-delete-item", isAuth, postCartDeleteItem);
 
-router.get("/orders/:orderId", isAuth);
+router.get("/orders", isAuth, getOrders);
 
-router.get("/user-details/:userId", isAuth);
+router.get("/orders/:orderId", isAuth, getOrder);
 
-router.put("/user-details/:userId", validators, isAuth);
+router.get("/user-details/", isAuth, getUserDetails);
+
+router.put("/user-details/", validatorsUserDetails, isAuth, putEditUserDetails);
+
+router.put("/change-email", emailValidator, isAuth, putEditEmail);
 
 module.exports = router;

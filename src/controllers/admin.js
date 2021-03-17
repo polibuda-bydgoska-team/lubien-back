@@ -129,7 +129,11 @@ exports.addProduct = async (req, res, next) => {
   try {
     const validationErrors = validationResult(req);
     if (!validationErrors.isEmpty()) {
-      createError("Validation failed, entered data is incorrect.", 422);
+      createError(
+        "Validation failed, entered data is incorrect.",
+        422,
+        validationErrors.array()
+      );
     }
 
     // if (!req.files) {
@@ -190,7 +194,11 @@ exports.editProduct = async (req, res, next) => {
   try {
     const validationErrors = validationResult(req);
     if (!validationErrors.isEmpty()) {
-      createError("Validation failed, entered data is incorrect.", 422);
+      createError(
+        "Validation failed, entered data is incorrect.",
+        422,
+        validationErrors.array()
+      );
     }
 
     const updates = Object.keys(req.body);
@@ -212,7 +220,7 @@ exports.editProduct = async (req, res, next) => {
     ];
     const areUpdatesValid = validateUpdates(updates, allowedUpdates);
     if (!areUpdatesValid.isOperationValid) {
-      createError("Can't updates this fields", 422);
+      createError("Can't updates this fields", 422, areUpdatesValid.error);
     }
 
     // let imagesURL = req.body.imagesURL;
