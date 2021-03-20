@@ -36,7 +36,7 @@ const userSchema = new mongoose.Schema({
       type: String,
       required: true,
     },
-    addressAditionalInfo: {
+    addressAdditionalInfo: {
       type: String,
       required: false,
     },
