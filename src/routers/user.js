@@ -22,7 +22,7 @@ const validatorsUserDetails = [
   body("companyName").trim(),
   body("street").trim().notEmpty(),
   body("houseNumber").trim().notEmpty(),
-  body("addressAditionalInfo").trim(),
+  body("addressAdditionalInfo").trim(),
   body("city").trim(),
   body("county").trim(),
   body("postCode").trim(),
