@@ -25,6 +25,7 @@ exports.signup = async (req, res, next) => {
       "phone",
       "firstName",
       "lastName",
+      "address",
       "companyName",
       "street",
       "houseNumber",
@@ -45,12 +46,14 @@ exports.signup = async (req, res, next) => {
       firstName,
       lastName,
       companyName,
-      street,
-      houseNumber,
-      addressAdditionalInfo,
-      city,
-      county,
-      postCode,
+      address: {
+        street,
+        houseNumber,
+        addressAdditionalInfo,
+        city,
+        county,
+        postCode,
+      },
     } = req.body;
 
     const hashedPwd = await bcrypt.hash(password, 12);

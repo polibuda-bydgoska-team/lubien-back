@@ -134,6 +134,7 @@ exports.putEditUserDetails = async (req, res, next) => {
       "firstName",
       "lastName",
       "companyName",
+      "address",
       "street",
       "houseNumber",
       "addressAdditionalInfo",
@@ -151,12 +152,14 @@ exports.putEditUserDetails = async (req, res, next) => {
       firstName,
       lastName,
       companyName,
-      street,
-      houseNumber,
-      addressAdditionalInfo,
-      city,
-      county,
-      postCode,
+      address: {
+        street,
+        houseNumber,
+        addressAdditionalInfo,
+        city,
+        county,
+        postCode,
+      },
     } = req.body;
 
     const user = await User.findById(req.userId);
