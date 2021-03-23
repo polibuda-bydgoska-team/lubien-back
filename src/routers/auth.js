@@ -49,5 +49,5 @@ const validators = [
   body("postCode").trim(),
 ];
 
-router.put("/signup", validators, signup);
+router.put("/signup", signup);
 router.post("/login", login);
