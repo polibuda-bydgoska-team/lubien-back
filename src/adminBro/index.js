@@ -1,11 +1,11 @@
 const AdminBro = require("admin-bro");
-const bcrypt = require("bcryptjs");
-
 const Admin = require("../models/admin");
 const User = require("../models/user");
 const Product = require("../models/product");
 const Order = require("../models/order");
 const userResource = require("./resources/userResource");
+const orderResource = require("./resources/orderResource");
+const { after, before } = require("./actions/passwordActions");
 
 const sidebarGroups = {
   user: {
@@ -22,7 +22,7 @@ const sidebarGroups = {
   },
   admin: {
     name: "Admin Users Managment",
-    icon: "Admin",
+    icon: "User",
   },
 };
 
@@ -44,6 +44,7 @@ const adminBro = new AdminBro({
     {
       resource: Order,
       options: {
+        ...orderResource,
         parent: sidebarGroups.order,
       },
     },
@@ -56,7 +57,7 @@ const adminBro = new AdminBro({
             isVisible: false,
           },
           password: {
-            type: "string",
+            type: "password",
             isVisible: {
               list: false,
               edit: true,
@@ -67,20 +68,10 @@ const adminBro = new AdminBro({
         },
         actions: {
           new: {
-            before: async (request) => {
-              if (request.payload.password) {
-                request.payload = {
-                  ...request.payload,
-                  encryptedPassword: await bcrypt.hash(
-                    request.payload.password,
-                    12
-                  ),
-                  password: undefined,
-                };
-              }
-              return request;
-            },
+            after: after,
+            before: before,
           },
+          edit: { after: after, before: before },
         },
       },
     },

@@ -5,8 +5,6 @@ const cors = require("cors");
 require("./db/db-connection");
 const bcrypt = require("bcryptjs");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
-const uri = process.env.ATLAS_URI;
-const session = require("express-session");
 const MongoStore = require("connect-mongo");
 
 const Admin = require("./models/admin");
@@ -16,19 +14,31 @@ const AdminBroMongoose = require("@admin-bro/mongoose");
 AdminBro.registerAdapter(AdminBroMongoose);
 const adminBro = require("./adminBro");
 
-const router = AdminBroExpress.buildAuthenticatedRouter(adminBro, {
-  authenticate: async (email, password) => {
-    const admin = await Admin.findOne({ email });
-    if (admin) {
-      const matched = await bcrypt.compare(password, admin.encryptedPassword);
-      if (matched) {
-        return admin;
+const routerAdminBro = AdminBroExpress.buildAuthenticatedRouter(
+  adminBro,
+  {
+    authenticate: async (email, password) => {
+      const admin = await Admin.findOne({ email });
+      if (admin) {
+        const matched = await bcrypt.compare(password, admin.encryptedPassword);
+        if (matched) {
+          return admin;
+        }
       }
-    }
-    return false;
+      return false;
+    },
+    cookiePassword: process.env.COOKIE_PASSWORD,
   },
-  cookiePassword: "some-secret-password-used-to-secure-cookie",
-});
+  null,
+  {
+    resave: false,
+    saveUninitialized: true,
+    store: MongoStore.create({
+      mongoUrl: process.env.ATLAS_URI,
+      ttl: 1 * 9 * 60 * 60,
+    }),
+  }
+);
 
 const authRouter = require("./routers/auth");
 const shopRouter = require("./routers/shop");
@@ -39,17 +49,7 @@ const errorHandler = require("./middleware/errorHandler");
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(adminBro.options.rootPath, router);
-
-app.use(
-  session({
-    secret: "some-secret-password-used-to-secure-cookie",
-    store: MongoStore.create({ mongoUrl: uri }),
-    resave: false,
-    saveUninitialized: true,
-  })
-);
-
+app.use(adminBro.options.rootPath, routerAdminBro);
 app.use(cors());
 app.use(express.json());
 app.use("/auth", authRouter);
