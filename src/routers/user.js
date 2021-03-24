@@ -22,7 +22,7 @@ const validatorsUserDetails = [
   body("companyName").trim(),
   body("street").trim().notEmpty(),
   body("houseNumber").trim().notEmpty(),
-  body("addressAditionalInfo").trim(),
+  body("addressAdditionalInfo").trim(),
   body("city").trim(),
   body("county").trim(),
   body("postCode").trim(),
@@ -52,7 +52,7 @@ router.get("/orders/:orderId", isAuth, getOrder);
 
 router.get("/user-details/", isAuth, getUserDetails);
 
-router.put("/user-details/", validatorsUserDetails, isAuth, putEditUserDetails);
+router.put("/user-details/", isAuth, putEditUserDetails);
 
 router.put("/change-email", emailValidator, isAuth, putEditEmail);
 

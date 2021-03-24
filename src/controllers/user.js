@@ -103,7 +103,7 @@ exports.getUserDetails = async (req, res, next) => {
       address: {
         street: user.address.street,
         houseNumber: user.address.houseNumber,
-        addressAditionalInfo: user.address.addressAditionalInfo || "",
+        addressAdditionalInfo: user.address.addressAdditionalInfo || "",
         city: user.address.city,
         county: user.address.county || "",
         postCode: user.address.postCode,
@@ -136,7 +136,7 @@ exports.putEditUserDetails = async (req, res, next) => {
       "companyName",
       "street",
       "houseNumber",
-      "addressAditionalInfo",
+      "addressAdditionalInfo",
       "city",
       "county",
       "postCode",
@@ -153,7 +153,7 @@ exports.putEditUserDetails = async (req, res, next) => {
       companyName,
       street,
       houseNumber,
-      addressAditionalInfo,
+      addressAdditionalInfo,
       city,
       county,
       postCode,
@@ -167,7 +167,7 @@ exports.putEditUserDetails = async (req, res, next) => {
     user.companyName = companyName;
     user.address.street = street;
     user.address.houseNumber = houseNumber;
-    user.address.addressAditionalInfo = addressAditionalInfo;
+    user.address.addressAdditionalInfo = addressAdditionalInfo;
     user.address.city = city;
     user.address.county = county;
     user.address.postCode = postCode;
