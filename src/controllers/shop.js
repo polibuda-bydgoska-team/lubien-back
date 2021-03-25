@@ -6,11 +6,7 @@ const stripe = require("stripe")(process.env.STRIPE_API_KEY);
 
 exports.getProducts = async (req, res, next) => {
   try {
-    const products = await Product.find({});
-    if (!products) {
-      createError("Could not find products", 404);
-    }
-    return res.status(200).send(products);
+    return res.status(200).send(res.paginatedResults);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
