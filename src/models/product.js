@@ -6,17 +6,16 @@ const productSchema = new mongoose.Schema({
     required: true,
   },
   price: {
-    type: Number,
-    required: true,
-  },
-  size: {
-    type: String,
-    enum: ["Large", "Extra Large"],
-    required: true,
+    large: { type: Number, required: true },
+    extraLarge: { type: Number, required: true },
   },
   quantity: {
-    type: Number,
-    required: true,
+    large: { type: Number, required: true },
+    extraLarge: { type: Number, required: true },
+  },
+  burnTime: {
+    large: { type: Number, required: true },
+    extraLarge: { type: Number, required: true },
   },
   mainNotes: {
     type: String,
