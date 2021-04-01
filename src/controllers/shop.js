@@ -37,13 +37,17 @@ exports.getCheckout = async (req, res, next) => {
       .populate("cart.items.productId")
       .exec();
     const products = user.cart.items;
+    const size = user.cart.items.size;
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: products.map((p) => {
         return {
           name: p.productId.title,
-          amount: p.productId.price * 100,
+          amount:
+            size === "large"
+              ? p.productId.price.large * 100
+              : p.productId.price.extraLarge * 100,
           currency: "GBP",
           quantity: p.quantity,
         };
