@@ -59,13 +59,14 @@ const userSchema = new mongoose.Schema({
           ref: "Product",
           required: true,
         },
+        size: { type: String, required: true },
         quantity: { type: Number, required: true },
       },
     ],
   },
 });
 
-userSchema.methods.addToCart = function (product) {
+userSchema.methods.addToCart = function (product, size) {
   const cartProductIndex = this.cart.items.findIndex((cp) => {
     return cp.productId.toString() === product._id.toString();
   });
@@ -78,6 +79,7 @@ userSchema.methods.addToCart = function (product) {
   } else {
     updatedCartItems.push({
       productId: product._id,
+      size: size,
       quantity: newQuantity,
     });
   }
