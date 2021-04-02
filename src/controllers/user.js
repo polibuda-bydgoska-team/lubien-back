@@ -32,7 +32,7 @@ exports.postCart = async (req, res, next) => {
     }
     const user = await User.findById(req.userId);
     await user.addToCart(product, productSize);
-    res.status(200).send("Product added to cart", product);
+    res.status(200).send(product);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -50,7 +50,7 @@ exports.postCartDeleteItem = async (req, res, next) => {
     }
     const user = await User.findById(req.userId);
     await user.removeFromCart(productId);
-    res.status(200).send("Product deleted from cart", product);
+    res.status(200).send(product);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
