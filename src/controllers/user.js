@@ -8,7 +8,7 @@ const validateUpdates = require("../utils/validateUpdates");
 exports.getCart = async (req, res, next) => {
   try {
     const user = await User.findById(req.userId)
-      .populate("cart.items.productId")
+      .populate("cart.items.product")
       .exec();
 
     const products = user.cart.items;
