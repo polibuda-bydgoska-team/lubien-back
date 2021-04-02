@@ -31,7 +31,7 @@ exports.postCart = async (req, res, next) => {
       createError("Could not find product", 404);
     }
     const user = await User.findById(req.userId);
-    await user.addtoCart(product, productSize);
+    await user.addToCart(product);
     res.status(200).send("Product added to cart", product);
   } catch (error) {
     if (!error.statusCode) {
