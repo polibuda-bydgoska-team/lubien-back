@@ -26,12 +26,51 @@ exports.postCart = async (req, res, next) => {
   try {
     const productId = req.body.productId;
     const productSize = req.body.size;
+    const productQuantity = req.body.quantity;
     const product = await Product.findById(productId);
     if (!product) {
       createError("Could not find product", 404);
     }
     const user = await User.findById(req.userId);
-    await user.addToCart(product, productSize);
+    await user.addToCart(product, productSize, productQuantity);
+    res.status(200).send(product);
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
+};
+
+exports.postIncreaseItemInCart = async (req, res, next) => {
+  try {
+    const productId = req.body.productId;
+    const productAddValue = req.body.addValue;
+    const product = await Product.findById(productId);
+    if (!product) {
+      createError("Could not find product", 404);
+    }
+    const user = await User.findById(req.userId);
+    await user.raiseProductQuantityInCart(product, productAddValue);
+    res.status(200).send(product);
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
+};
+
+exports.postReduceItemInCart = async (req, res, next) => {
+  try {
+    const productId = req.body.productId;
+    const productsubtractValue = req.body.subtractValue;
+    const product = await Product.findById(productId);
+    if (!product) {
+      createError("Could not find product", 404);
+    }
+    const user = await User.findById(req.userId);
+    await user.reduceProductQuantityInCart(product, productsubtractValue);
     res.status(200).send(product);
   } catch (error) {
     if (!error.statusCode) {
@@ -51,6 +90,19 @@ exports.postCartDeleteItem = async (req, res, next) => {
     const user = await User.findById(req.userId);
     await user.removeFromCart(productId);
     res.status(200).send(product);
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
+};
+
+exports.getClearCart = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.userId);
+    await user.clearCart();
+    res.status(200).send({ message: "Cart cleared" });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
