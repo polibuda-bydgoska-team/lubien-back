@@ -9,7 +9,7 @@ exports.getCart = async (req, res, next) => {
   try {
     const user = await User.findById(req.userId)
       .populate("cart.items.productId")
-      .execPopulate();
+      .exec();
 
     const products = user.cart.items;
 
