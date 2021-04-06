@@ -67,14 +67,21 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.methods.addToCart = function (product, size, quantity) {
+  const cartProductIndex = this.cart.items.findIndex((cp) => {
+    return cp.product.toString() === product._id.toString();
+  });
   const updatedCartItems = [...this.cart.items];
 
-  updatedCartItems.push({
-    product: product._id,
-    size: size,
-    quantity: quantity,
-  });
-
+  if (cartProductIndex >= 0) {
+    const newQuantity = this.cart.items[cartProductIndex].quantity + 1;
+    updatedCartItems[cartProductIndex].quantity = newQuantity;
+  } else {
+    updatedCartItems.push({
+      product: product._id,
+      size: size,
+      quantity: quantity,
+    });
+  }
   const updatedCart = {
     items: updatedCartItems,
   };
@@ -89,7 +96,7 @@ userSchema.methods.raiseProductQuantityInCart = function (product, addValue) {
   const updatedCartItems = [...this.cart.items];
 
   if (cartProductIndex >= 0) {
-    newQuantity = this.cart.items[cartProductIndex].quantity + addValue;
+    const newQuantity = this.cart.items[cartProductIndex].quantity + addValue;
     updatedCartItems[cartProductIndex].quantity = newQuantity;
   } else {
     updatedCartItems.push({
@@ -116,7 +123,8 @@ userSchema.methods.reduceProductQuantityInCart = function (
   let updatedCartItems = [...this.cart.items];
 
   if (cartProductIndex >= 0) {
-    newQuantity = this.cart.items[cartProductIndex].quantity - subtractValue;
+    const newQuantity =
+      this.cart.items[cartProductIndex].quantity - subtractValue;
     updatedCartItems[cartProductIndex].quantity = newQuantity;
   }
 
@@ -145,29 +153,5 @@ userSchema.methods.clearCart = function () {
   this.cart = { items: [] };
   return this.save();
 };
-
-// userSchema.methods.addToCart = function (product, size) {
-//   const cartProductIndex = this.cart.items.findIndex((cp) => {
-//     return cp.product.toString() === product._id.toString();
-//   });
-//   let newQuantity = 1;
-//   const updatedCartItems = [...this.cart.items];
-
-//   if (cartProductIndex >= 0) {
-//     newQuantity = this.cart.items[cartProductIndex].quantity + 1;
-//     updatedCartItems[cartProductIndex].quantity = newQuantity;
-//   } else {
-//     updatedCartItems.push({
-//       product: product._id,
-//       size: size,
-//       quantity: newQuantity,
-//     });
-//   }
-//   const updatedCart = {
-//     items: updatedCartItems,
-//   };
-//   this.cart = updatedCart;
-//   return this.save();
-// };
 
 module.exports = mongoose.model("User", userSchema);
