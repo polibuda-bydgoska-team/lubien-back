@@ -1,10 +1,14 @@
+const crypto = require("crypto");
+
 const { validationResult } = require("express-validator");
 const createError = require("../utils/createError");
 const validateUpdates = require("../utils/validateUpdates");
+const sendEmail = require("../utils/sendEmail");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const authConfig = require("../config/auth");
 const User = require("../models/user");
+const Token = require("../models/token");
 
 exports.signup = async (req, res, next) => {
   try {
@@ -76,21 +80,20 @@ exports.signup = async (req, res, next) => {
 
     await user.save();
 
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET,
-      authConfig
-    );
-
-    const decodedToken = jwt.decode(token, { complete: true });
-    const expirationDateInJWT = decodedToken.payload.exp;
-    const expirationDate = new Date(expirationDateInJWT * 1000);
-
-    return res.status(201).send({
-      token: token,
-      expirationDate: expirationDate,
-      userId: user._id.toString(),
+    const token = new Token({
+      userId: user._id,
+      token: crypto.randomBytes(16).toString("hex"),
     });
+
+    await token.save();
+
+    sendEmail(user.email, token.token, req.headers.host);
+
+    return res
+      .status(201)
+      .send(
+        "The verification link has been sent! If you don't see it, check spam or click resend. It will be expire after one day."
+      );
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -118,6 +121,13 @@ exports.login = async (req, res, next) => {
     const isPasswordValid = await bcrypt.compare(password, foundUser.password);
     if (!isPasswordValid) {
       createError("Wrong password", 400);
+    }
+
+    if (!foundUser.isVerified) {
+      createError(
+        "Your email has not been verified. Please click on resend.",
+        401
+      );
     }
 
     const token = jwt.sign(

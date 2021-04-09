@@ -1,7 +1,11 @@
+const crypto = require("crypto");
+
 const Order = require("../models/order");
 const Product = require("../models/product");
 const User = require("../models/user");
+const Token = require("../models/token");
 const createError = require("../utils/createError");
+const sendEmail = require("../utils/sendEmail");
 const { validationResult } = require("express-validator/check");
 const validateUpdates = require("../utils/validateUpdates");
 
@@ -264,6 +268,81 @@ exports.putEditEmail = async (req, res, next) => {
     await user.save();
 
     res.status(200).send("User email updated");
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
+};
+
+exports.getConfirmEmail = async (req, res, next) => {
+  try {
+    const token = await Token.findOne({ token: req.params.token });
+
+    if (!token) {
+      createError(
+        "Your verification link may have expired. Please click on resend for verify your email.",
+        400
+      );
+    }
+
+    const user = await User.findOne({
+      _id: token.userId,
+      email: req.params.email,
+    });
+
+    if (!user) {
+      createError(
+        "We were unable to find a user for this verification. Please SignUp!",
+        401
+      );
+    }
+
+    user.isVerified = true;
+    await user.save();
+
+    token.delete();
+
+    res.status(200).send("Your account has been successfully verified!");
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
+};
+
+exports.postResendConfirmationEmail = async (req, res, next) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      createError(
+        "We were unable to find a user with that email. Make sure your email is correct!",
+        401
+      );
+    }
+
+    if (user.isVerified) {
+      return res
+        .status(200)
+        .send("This account has been already verified. Please log in.");
+    }
+
+    const token = new Token({
+      userId: user._id,
+      token: crypto.randomBytes(16).toString("hex"),
+    });
+
+    await token.save();
+
+    sendEmail(user.email, token.token, req.headers.host);
+
+    return res
+      .status(201)
+      .send(
+        "The verification link has been sent! If you don't see it, check spam or click resend. It will be expire after one day."
+      );
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;

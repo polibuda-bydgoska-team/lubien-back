@@ -14,6 +14,8 @@ const {
   getUserDetails,
   putEditUserDetails,
   putEditEmail,
+  getConfirmEmail,
+  postResendConfirmationEmail,
 } = require("../controllers/user");
 
 const router = express.Router();
@@ -64,5 +66,9 @@ router.get("/user-details/", isAuth, getUserDetails);
 router.put("/user-details/", isAuth, putEditUserDetails);
 
 router.put("/change-email", emailValidator, isAuth, putEditEmail);
+
+router.get("/confirmation/:email/:token", getConfirmEmail);
+
+router.post("/confirmation/resend", postResendConfirmationEmail);
 
 module.exports = router;
