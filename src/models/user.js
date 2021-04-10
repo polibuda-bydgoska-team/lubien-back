@@ -68,7 +68,10 @@ const userSchema = new mongoose.Schema({
 
 userSchema.methods.addToCart = function (product, size, quantity) {
   const cartProductIndex = this.cart.items.findIndex((cp) => {
-    return cp.product.toString() === product._id.toString();
+    return (
+      cp.product.toString() === product._id.toString() &&
+      cp.size === product.size
+    );
   });
   const updatedCartItems = [...this.cart.items];
 
