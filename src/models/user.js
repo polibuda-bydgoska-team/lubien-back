@@ -68,11 +68,9 @@ const userSchema = new mongoose.Schema({
 
 userSchema.methods.addToCart = function (product, size, quantity) {
   const cartProductIndex = this.cart.items.findIndex((cp) => {
-    return (
-      cp.product.toString() === product._id.toString() &&
-      cp.size === product.size
-    );
+    return cp.product.toString() === product._id.toString() && cp.size === size;
   });
+
   const updatedCartItems = [...this.cart.items];
 
   if (cartProductIndex >= 0) {
@@ -92,9 +90,13 @@ userSchema.methods.addToCart = function (product, size, quantity) {
   return this.save();
 };
 
-userSchema.methods.raiseProductQuantityInCart = function (product, addValue) {
+userSchema.methods.raiseProductQuantityInCart = function (
+  product,
+  size,
+  addValue
+) {
   const cartProductIndex = this.cart.items.findIndex((cp) => {
-    return cp.product.toString() === product._id.toString();
+    return cp.product.toString() === product._id.toString() && cp.size === size;
   });
   const updatedCartItems = [...this.cart.items];
 
@@ -118,10 +120,11 @@ userSchema.methods.raiseProductQuantityInCart = function (product, addValue) {
 
 userSchema.methods.reduceProductQuantityInCart = function (
   product,
+  size,
   subtractValue
 ) {
   const cartProductIndex = this.cart.items.findIndex((cp) => {
-    return cp.product.toString() === product._id.toString();
+    return cp.product.toString() === product._id.toString() && cp.size === size;
   });
   let updatedCartItems = [...this.cart.items];
 
@@ -133,7 +136,9 @@ userSchema.methods.reduceProductQuantityInCart = function (
 
   if (updatedCartItems[cartProductIndex].quantity <= 0) {
     updatedCartItems = this.cart.items.filter((item) => {
-      return item.product.toString() !== product._id.toString();
+      return (
+        item.product.toString() !== product._id.toString() && item.size !== size
+      );
     });
   }
 
@@ -144,9 +149,11 @@ userSchema.methods.reduceProductQuantityInCart = function (
   return this.save();
 };
 
-userSchema.methods.removeFromCart = function (productId) {
+userSchema.methods.removeFromCart = function (productId, size) {
   const updatedCartItems = this.cart.items.filter((item) => {
-    return item.product.toString() !== productId.toString();
+    return (
+      item.product.toString() !== productId.toString() && item.size !== size
+    );
   });
   this.cart.items = updatedCartItems;
   return this.save();
