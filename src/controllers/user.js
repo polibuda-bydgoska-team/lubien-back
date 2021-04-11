@@ -99,7 +99,7 @@ exports.postCartDeleteItem = async (req, res, next) => {
       createError("Could not find product", 404);
     }
     const user = await User.findById(req.userId);
-    await user.removeFromCart(productId, productSize);
+    await user.removeFromCart(product, productSize);
     res.status(200).send(product);
   } catch (error) {
     if (!error.statusCode) {

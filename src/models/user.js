@@ -135,11 +135,7 @@ userSchema.methods.reduceProductQuantityInCart = function (
   }
 
   if (updatedCartItems[cartProductIndex].quantity <= 0) {
-    updatedCartItems = this.cart.items.filter((item) => {
-      return (
-        item.product.toString() !== product._id.toString() && item.size !== size
-      );
-    });
+    return this.removeFromCart(product, size);
   }
 
   const updatedCart = {
@@ -149,13 +145,13 @@ userSchema.methods.reduceProductQuantityInCart = function (
   return this.save();
 };
 
-userSchema.methods.removeFromCart = function (productId, size) {
-  const updatedCartItems = this.cart.items.filter((item) => {
-    return (
-      item.product.toString() !== productId.toString() && item.size !== size
-    );
+userSchema.methods.removeFromCart = function (product, size) {
+  const cartProductIndex = this.cart.items.findIndex((cp) => {
+    return cp.product.toString() === product._id.toString() && cp.size === size;
   });
-  this.cart.items = updatedCartItems;
+
+  this.cart.items.splice(cartProductIndex, 1);
+
   return this.save();
 };
 
