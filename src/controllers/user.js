@@ -45,13 +45,18 @@ exports.postCart = async (req, res, next) => {
 exports.postIncreaseItemInCart = async (req, res, next) => {
   try {
     const productId = req.body.productId;
+    const productSize = req.body.size;
     const productAddValue = req.body.addValue;
     const product = await Product.findById(productId);
     if (!product) {
       createError("Could not find product", 404);
     }
     const user = await User.findById(req.userId);
-    await user.raiseProductQuantityInCart(product, productAddValue);
+    await user.raiseProductQuantityInCart(
+      product,
+      productSize,
+      productAddValue
+    );
     res.status(200).send(product);
   } catch (error) {
     if (!error.statusCode) {
@@ -64,13 +69,18 @@ exports.postIncreaseItemInCart = async (req, res, next) => {
 exports.postReduceItemInCart = async (req, res, next) => {
   try {
     const productId = req.body.productId;
+    const productSize = req.body.size;
     const productsubtractValue = req.body.subtractValue;
     const product = await Product.findById(productId);
     if (!product) {
       createError("Could not find product", 404);
     }
     const user = await User.findById(req.userId);
-    await user.reduceProductQuantityInCart(product, productsubtractValue);
+    await user.reduceProductQuantityInCart(
+      product,
+      productSize,
+      productsubtractValue
+    );
     res.status(200).send(product);
   } catch (error) {
     if (!error.statusCode) {
@@ -83,12 +93,13 @@ exports.postReduceItemInCart = async (req, res, next) => {
 exports.postCartDeleteItem = async (req, res, next) => {
   try {
     const productId = req.body.productId;
+    const productSize = req.body.size;
     const product = await Product.findById(productId);
     if (!product) {
       createError("Could not find product", 404);
     }
     const user = await User.findById(req.userId);
-    await user.removeFromCart(productId);
+    await user.removeFromCart(product, productSize);
     res.status(200).send(product);
   } catch (error) {
     if (!error.statusCode) {
