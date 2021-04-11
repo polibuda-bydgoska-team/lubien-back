@@ -19,6 +19,7 @@ function paginatedResults(model) {
       results.next = {
         page: page + 1,
         limit: limit,
+        pageAmount: endIndex,
       };
     }
 
@@ -26,6 +27,7 @@ function paginatedResults(model) {
       results.previous = {
         page: page - 1,
         limit: limit,
+        pageAmount: endIndex,
       };
     }
     try {
