@@ -8,6 +8,7 @@ const createError = require("../utils/createError");
 const sendEmail = require("../utils/sendEmail");
 const { validationResult } = require("express-validator/check");
 const validateUpdates = require("../utils/validateUpdates");
+const bcrypt = require("bcryptjs");
 
 exports.getCart = async (req, res, next) => {
   try {
@@ -302,7 +303,7 @@ exports.getConfirmEmail = async (req, res, next) => {
     user.isVerified = true;
     await user.save();
 
-    token.delete();
+    await token.delete();
 
     res.status(200).send("Your account has been successfully verified!");
   } catch (error) {
@@ -345,6 +346,84 @@ exports.postResendConfirmationEmail = async (req, res, next) => {
       .send(
         "The verification link has been sent! If you don't see it, check spam or click resend. It will be expire after one day."
       );
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
+};
+
+exports.getResetPassword = async (req, res, next) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      createError(
+        "We were unable to find a user with that email. Make sure your email is correct!",
+        401
+      );
+    }
+
+    const token = await Token.findOne({ userId: user._id });
+    if (token) {
+      await token.delete();
+    }
+
+    const linkToken = crypto.randomBytes(32).toString("hex");
+    const hashToken = await bcrypt.hash(linkToken, 12);
+
+    const expiresTokenDate = new Date();
+
+    const resetToken = new Token({
+      userId: user._id,
+      token: hashToken,
+      expireAt: expiresTokenDate.setHours(expiresTokenDate.getHours() + 1),
+    });
+
+    await resetToken.save();
+
+    emailBody = `<p>You can reset your password by clicking this <b><a href="http://${req.headers.host}/user/reset-password/${user._id}/${linkToken}">link</a>.<b></p>`;
+
+    sendEmail(user.email, "Password reset", emailBody);
+
+    return res
+      .status(201)
+      .send(
+        "The reset password link has been sent! If you don't see it, check spam or click resend. It will be expire after one hour."
+      );
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
+};
+
+exports.postResetPassword = async (req, res, next) => {
+  try {
+    const resetToken = await Token.findOne({ userId: req.params.userId });
+    if (!resetToken) {
+      createError("Invalid or expired password reset link!", 401);
+    }
+
+    const isValid = await bcrypt.compare(req.params.token, resetToken.token);
+    if (!isValid) {
+      createError("Invalid or expired password reset link!", 401);
+    }
+
+    const newHashedPwd = await bcrypt.hash(req.body.password, 12);
+
+    await User.updateOne(
+      { _id: req.params.userId },
+      { $set: { password: newHashedPwd } },
+      { new: true }
+    );
+
+    await resetToken.delete();
+
+    return res
+      .status(201)
+      .send("You have successfully reset your password. You can go to login.");
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
