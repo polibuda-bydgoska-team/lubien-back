@@ -9,14 +9,12 @@ const transporter = nodemailer.createTransport(
   })
 );
 
-const sendEmail = (userEmail, emailToken, host) => {
+const sendEmail = (userEmail, subject, htmlBody) => {
   transporter.sendMail({
     to: userEmail,
     from: "adibu8@gmail.com",
-    subject: "Account Verification Link",
-    html: `
-          <p>Please verify your account by clicking this <b><a href="http://${host}/user/confirmation/${userEmail}/${emailToken}">link</a>.<b></p>
-        `,
+    subject: subject,
+    html: htmlBody,
   });
 };
 

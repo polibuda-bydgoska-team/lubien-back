@@ -87,7 +87,9 @@ exports.signup = async (req, res, next) => {
 
     await token.save();
 
-    sendEmail(user.email, token.token, req.headers.host);
+    emailBody = `<p>Please verify your account by clicking this <b><a href="http://${req.headers.host}/user/confirmation/${user.email}/${token.token}">link</a>.<b></p>`;
+
+    sendEmail(user.email, "Account Verification Link", emailBody);
 
     return res
       .status(201)
