@@ -146,7 +146,6 @@ exports.login = async (req, res, next) => {
       token: token,
       expirationDate: expirationDate,
       userId: foundUser._id.toString(),
-      userRole: foundUser.role,
     });
   } catch (error) {
     if (!error.statusCode) {

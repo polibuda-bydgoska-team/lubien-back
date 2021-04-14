@@ -16,6 +16,8 @@ const {
   putEditEmail,
   getConfirmEmail,
   postResendConfirmationEmail,
+  getResetPassword,
+  postResetPassword,
 } = require("../controllers/user");
 
 const router = express.Router();
@@ -70,5 +72,9 @@ router.put("/change-email", emailValidator, isAuth, putEditEmail);
 router.get("/confirmation/:email/:token", getConfirmEmail);
 
 router.post("/confirmation/resend", postResendConfirmationEmail);
+
+router.get("/reset-password", getResetPassword);
+
+router.post("/reset-password/:userId/:token", postResetPassword);
 
 module.exports = router;
