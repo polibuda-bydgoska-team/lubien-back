@@ -44,20 +44,20 @@ exports.postCart = async (req, res, next) => {
 
 exports.postIncreaseItemInCart = async (req, res, next) => {
   try {
-    const productId = req.body.productId;
-    const productSize = req.body.size;
-    const productAddValue = req.body.addValue;
-    const product = await Product.findById(productId);
-    if (!product) {
-      createError("Could not find product", 404);
-    }
     const user = await User.findById(req.userId);
-    await user.raiseProductQuantityInCart(
-      product,
-      productSize,
-      productAddValue
-    );
-    res.status(200).send(product);
+    const productsArray = req.body.productsArray;
+    productsArray.forEach((p) => {
+      const product = await Product.findById(p.productId);
+      if (!product) {
+      createError("Could not find product", 404);
+      }
+      await user.raiseProductQuantityInCart(
+        product,
+        p.size,
+        p.addValue
+      );
+    });
+    res.status(200).send({message: "Quantitiy changed"});
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -68,20 +68,20 @@ exports.postIncreaseItemInCart = async (req, res, next) => {
 
 exports.postReduceItemInCart = async (req, res, next) => {
   try {
-    const productId = req.body.productId;
-    const productSize = req.body.size;
-    const productsubtractValue = req.body.subtractValue;
-    const product = await Product.findById(productId);
-    if (!product) {
-      createError("Could not find product", 404);
-    }
     const user = await User.findById(req.userId);
-    await user.reduceProductQuantityInCart(
-      product,
-      productSize,
-      productsubtractValue
-    );
-    res.status(200).send(product);
+    const productsArray = req.body.productsArray;
+    productsArray.forEach((p)=>{
+      const product = await Product.findById(p.productId);
+      if (!product) {
+      createError("Could not find product", 404);
+      }
+      await user.reduceProductQuantityInCart(
+        product,
+        p.size,
+        p.subtractValue
+      );
+    })
+    res.status(200).send({message: "Quantitiy changed"}));
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
