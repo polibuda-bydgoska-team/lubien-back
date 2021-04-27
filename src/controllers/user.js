@@ -46,18 +46,14 @@ exports.postIncreaseItemInCart = async (req, res, next) => {
   try {
     const user = await User.findById(req.userId);
     const productsArray = req.body.productsArray;
-    productsArray.forEach((p) => {
+    productsArray.forEach(async (p) => {
       const product = await Product.findById(p.productId);
       if (!product) {
-      createError("Could not find product", 404);
+        createError("Could not find product", 404);
       }
-      await user.raiseProductQuantityInCart(
-        product,
-        p.size,
-        p.addValue
-      );
+      await user.raiseProductQuantityInCart(product, p.size, p.addValue);
     });
-    res.status(200).send({message: "Quantitiy changed"});
+    res.status(200).send({ message: "Quantitiy changed" });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -70,18 +66,14 @@ exports.postReduceItemInCart = async (req, res, next) => {
   try {
     const user = await User.findById(req.userId);
     const productsArray = req.body.productsArray;
-    productsArray.forEach((p)=>{
+    productsArray.forEach(async (p) => {
       const product = await Product.findById(p.productId);
       if (!product) {
-      createError("Could not find product", 404);
+        createError("Could not find product", 404);
       }
-      await user.reduceProductQuantityInCart(
-        product,
-        p.size,
-        p.subtractValue
-      );
-    })
-    res.status(200).send({message: "Quantitiy changed"}));
+      await user.reduceProductQuantityInCart(product, p.size, p.subtractValue);
+    });
+    res.status(200).send({ message: "Quantitiy changed" });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
