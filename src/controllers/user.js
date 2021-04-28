@@ -33,7 +33,10 @@ exports.postCart = async (req, res, next) => {
     }
     const user = await User.findById(req.userId);
     await user.addToCart(product, productSize, productQuantity);
-    res.status(200).send(product);
+    const updatedUser = await User.findById(req.userId)
+      .populate("cart.items.product")
+      .exec();
+    res.status(200).send(updatedUser.cart);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -46,23 +49,26 @@ exports.postCartChangeQuantity = async (req, res, next) => {
   try {
     const user = await User.findById(req.userId);
     const productsArray = req.body.productsArray;
-    productsArray.forEach(async (p) => {
+
+    for (const p of productsArray) {
       const product = await Product.findById(p.productId);
       if (!product) {
         createError("Could not find product", 404);
       }
       if (p.addValue) {
         await user.raiseProductQuantityInCart(product, p.size, p.addValue);
-      }
-      if (p.subtractValue) {
+      } else {
         await user.reduceProductQuantityInCart(
           product,
           p.size,
           p.subtractValue
         );
       }
-    });
-    res.status(200).send({ message: "Quantitiy changed" });
+    }
+    const updatedUser = await User.findById(req.userId)
+      .populate("cart.items.product")
+      .exec();
+    res.status(200).send(updatedUser.cart);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -79,9 +85,11 @@ exports.postCartDeleteItem = async (req, res, next) => {
     if (!product) {
       createError("Could not find product", 404);
     }
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.userId)
+      .populate("cart.items.product")
+      .exec();
     await user.removeFromCart(product, productSize);
-    res.status(200).send(product);
+    res.status(200).send(user.cart);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -92,9 +100,11 @@ exports.postCartDeleteItem = async (req, res, next) => {
 
 exports.getClearCart = async (req, res, next) => {
   try {
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.userId)
+      .populate("cart.items.product")
+      .exec();
     await user.clearCart();
-    res.status(200).send({ message: "Cart cleared" });
+    res.status(200).send(user.cart);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
