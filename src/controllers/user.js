@@ -36,7 +36,7 @@ exports.postCart = async (req, res, next) => {
     const updatedUser = await User.findById(req.userId)
       .populate("cart.items.product")
       .exec();
-    res.status(200).send(updatedUser.cart);
+    res.status(200).send(updatedUser.cart.items);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -68,7 +68,7 @@ exports.postCartChangeQuantity = async (req, res, next) => {
     const updatedUser = await User.findById(req.userId)
       .populate("cart.items.product")
       .exec();
-    res.status(200).send(updatedUser.cart);
+    res.status(200).send(updatedUser.cart.items);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -89,7 +89,7 @@ exports.postCartDeleteItem = async (req, res, next) => {
       .populate("cart.items.product")
       .exec();
     await user.removeFromCart(product, productSize);
-    res.status(200).send(user.cart);
+    res.status(200).send(user.cart.items);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -104,7 +104,7 @@ exports.getClearCart = async (req, res, next) => {
       .populate("cart.items.product")
       .exec();
     await user.clearCart();
-    res.status(200).send(user.cart);
+    res.status(200).send(user.cart.items);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
