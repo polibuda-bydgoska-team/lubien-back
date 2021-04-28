@@ -2,7 +2,6 @@ const Order = require("../models/order");
 const Product = require("../models/product");
 const User = require("../models/user");
 const createError = require("../utils/createError");
-const { validationResult } = require("express-validator/check");
 const validateUpdates = require("../utils/validateUpdates");
 
 exports.getCart = async (req, res, next) => {
@@ -183,15 +182,6 @@ exports.getUserDetails = async (req, res, next) => {
 
 exports.putEditUserDetails = async (req, res, next) => {
   try {
-    const validationErrors = validationResult(req);
-    if (!validationErrors.isEmpty()) {
-      createError(
-        "Validation failed, entered data is incorrect.",
-        422,
-        validationErrors.array()
-      );
-    }
-
     const updates = Object.keys(req.body);
     const allowedUpdates = [
       "phone",
@@ -252,15 +242,6 @@ exports.putEditUserDetails = async (req, res, next) => {
 
 exports.putEditEmail = async (req, res, next) => {
   try {
-    const validationErrors = validationResult(req);
-    if (!validationErrors.isEmpty()) {
-      createError(
-        "Validation failed, entered data is incorrect.",
-        422,
-        validationErrors.array()
-      );
-    }
-
     const updates = Object.keys(req.body);
     const allowedUpdates = ["email"];
     const areUpdatesValid = validateUpdates(updates, allowedUpdates);

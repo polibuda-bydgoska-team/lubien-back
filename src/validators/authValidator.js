@@ -1,13 +1,7 @@
-const express = require("express");
-const { signup, login } = require("../controllers/auth");
-//const { registerValidator } = require("../validators/authValidator");
-const checkValidation = require("../middleware/checkValidation");
 const { body } = require("express-validator");
 const User = require("../models/user");
 
-const router = express.Router();
-
-registerValidator = [
+exports.registerValidator = [
   body("email").trim().notEmpty().withMessage("Email is required."),
   body("email")
     .trim()
@@ -26,7 +20,7 @@ registerValidator = [
     .trim()
     .isLength({ min: 8 })
     .matches(
-      /^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$/
+      "^(?=.*[a-z])(?=.*[A-Z])(?=.*d)(?=.*[@$!%*?&])[A-Za-zd@$!%*?&]{8,}$"
     )
     .withMessage(
       "Password must contains minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character."
@@ -52,24 +46,13 @@ registerValidator = [
   body("firstName").trim().notEmpty().withMessage("First name is required."),
   body("lastName").trim().notEmpty().withMessage("Last name is required."),
   body("companyName").optional().trim(),
-  body("address.street")
-    .trim()
-    .notEmpty()
-    .withMessage("Street address is required."),
-  body("address.houseNumber")
+  body("street").trim().notEmpty().withMessage("Street address is required."),
+  body("houseNumber")
     .trim()
     .notEmpty()
     .withMessage("House number is required."),
-  body("address.addressAdditionalInfo").optional().trim(),
-  body("address.city").trim().notEmpty().withMessage("City is required."),
-  body("address.county").optional().trim(),
-  body("address.postCode")
-    .trim()
-    .notEmpty()
-    .withMessage("Post code is required."),
+  body("addressAdditionalInfo").optional().trim(),
+  body("city").trim().notEmpty().withMessage("City is required."),
+  body("county").optional().trim(),
+  body("postCode").trim().notEmpty().withMessage("Post code is required."),
 ];
-
-router.put("/signup", registerValidator, signup);
-router.post("/login", login);
-
-module.exports = router;

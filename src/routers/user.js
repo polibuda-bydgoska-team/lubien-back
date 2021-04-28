@@ -1,6 +1,5 @@
 const express = require("express");
-const { body } = require("express-validator");
-const User = require("../models/user");
+const checkValidation = require("../middleware/checkValidation");
 const isAuth = require("../middleware/isAuth");
 const {
   getCart,
@@ -15,33 +14,12 @@ const {
   putEditUserDetails,
   putEditEmail,
 } = require("../controllers/user");
+const {
+  validatorsUserDetails,
+  emailValidator,
+} = require("../validators/userValidator");
 
 const router = express.Router();
-
-const validatorsUserDetails = [
-  body("phone").trim().notEmpty().isMobilePhone(),
-  body("firstName").trim().notEmpty(),
-  body("lastName").trim().notEmpty(),
-  body("companyName").trim(),
-  body("street").trim().notEmpty(),
-  body("houseNumber").trim().notEmpty(),
-  body("addressAdditionalInfo").trim(),
-  body("city").trim(),
-  body("county").trim(),
-  body("postCode").trim(),
-];
-
-const emailValidator = body("email")
-  .isEmail()
-  .withMessage("Please enter a valid email.")
-  .custom((value, { req }) => {
-    return User.findOne({ email: value }).then((userDoc) => {
-      if (userDoc) {
-        return Promise.reject("E-mail address already exists!");
-      }
-    });
-  })
-  .normalizeEmail();
 
 router.get("/cart", isAuth, getCart);
 
@@ -61,8 +39,20 @@ router.get("/orders/:orderId", isAuth, getOrder);
 
 router.get("/user-details/", isAuth, getUserDetails);
 
-router.put("/user-details/", isAuth, putEditUserDetails);
+router.put(
+  "/user-details/",
+  // validatorsUserDetails,
+  // checkValidation,
+  isAuth,
+  putEditUserDetails
+);
 
-router.put("/change-email", emailValidator, isAuth, putEditEmail);
+router.put(
+  "/change-email",
+  // emailValidator,
+  // checkValidation,
+  isAuth,
+  putEditEmail
+);
 
 module.exports = router;

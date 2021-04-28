@@ -1,10 +1,10 @@
-const { validationResult } = require("express-validator");
 const createError = require("../utils/createError");
 const validateUpdates = require("../utils/validateUpdates");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const authConfig = require("../config/auth");
 const User = require("../models/user");
+const { validationResult } = require("express-validator");
 
 exports.signup = async (req, res, next) => {
   try {
