@@ -3,6 +3,7 @@ const Product = require("../models/product");
 const User = require("../models/user");
 const createError = require("../utils/createError");
 const validateUpdates = require("../utils/validateUpdates");
+const bcrypt = require("bcryptjs");
 
 exports.getCart = async (req, res, next) => {
   try {
@@ -247,6 +248,51 @@ exports.putEditEmail = async (req, res, next) => {
     await user.save();
 
     res.status(200).send("User email updated");
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
+};
+
+exports.putChangePassword = async (req, res, next) => {
+  try {
+    const updates = Object.keys(req.body);
+    const allowedUpdates = [
+      "actualPassword",
+      "newPassword",
+      "confirmNewPassword",
+    ];
+    const areUpdatesValid = validateUpdates(updates, allowedUpdates);
+    if (!areUpdatesValid.isOperationValid) {
+      createError("Can't updates this fields", 422, areUpdatesValid.error);
+    }
+
+    const user = await User.findById(req.userId);
+
+    const { actualPassword, newPassword } = req.body;
+
+    const isActualPasswordValid = await bcrypt.compare(
+      actualPassword,
+      user.password
+    );
+    if (!isActualPasswordValid) {
+      createError("Wrong actual password", 400);
+    }
+
+    const isPasswordsSame = await bcrypt.compare(newPassword, user.password);
+    if (isPasswordsSame) {
+      createError("New password must be different than actual one", 400);
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 12);
+
+    user.password = hashedNewPassword;
+
+    await user.save();
+
+    res.status(200).send("New password is set");
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
