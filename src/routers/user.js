@@ -5,8 +5,7 @@ const isAuth = require("../middleware/isAuth");
 const {
   getCart,
   postCart,
-  postIncreaseItemInCart,
-  postReduceItemInCart,
+  postCartChangeQuantity,
   postCartDeleteItem,
   getClearCart,
   getOrders,
@@ -47,9 +46,7 @@ router.get("/cart", isAuth, getCart);
 
 router.post("/cart", isAuth, postCart);
 
-router.post("/cart-increase-item", isAuth, postIncreaseItemInCart);
-
-router.post("/cart-reduce-item", isAuth, postReduceItemInCart);
+router.post("/cart-change-quantity", isAuth, postCartChangeQuantity);
 
 router.post("/cart-delete-item", isAuth, postCartDeleteItem);
 
