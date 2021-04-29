@@ -12,10 +12,12 @@ const {
   getUserDetails,
   putEditUserDetails,
   putEditEmail,
+  putChangePassword,
 } = require("../controllers/user");
 const {
   validatorsUserDetails,
   emailValidator,
+  newPasswordValidator,
 } = require("../validators/userValidator");
 
 const router = express.Router();
@@ -50,6 +52,14 @@ router.put(
   checkValidation(),
   isAuth,
   putEditEmail
+);
+
+router.put(
+  "/change-password",
+  newPasswordValidator,
+  checkValidation(),
+  isAuth,
+  putChangePassword
 );
 
 module.exports = router;

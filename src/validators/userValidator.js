@@ -49,3 +49,32 @@ exports.emailValidator = [
     })
     .normalizeEmail(),
 ];
+
+exports.newPasswordValidator = [
+  body("actualPassword")
+    .trim()
+    .notEmpty()
+    .withMessage("Please write actual password."),
+  body("newPassword")
+    .trim()
+    .isLength({ min: 8 })
+    .matches(
+      /^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$/
+    )
+    .withMessage(
+      "New password must contains minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character."
+    ),
+  body("confirmNewPassword")
+    .trim()
+    .notEmpty()
+    .withMessage("Please confirm new password."),
+  body("confirmNewPassword")
+    .trim()
+    .notEmpty()
+    .custom((value, { req }) => {
+      if (value !== req.body.newPassword) {
+        throw new Error("New passwords have to match!");
+      }
+      return true;
+    }),
+];
