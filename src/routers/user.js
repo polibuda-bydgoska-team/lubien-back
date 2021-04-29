@@ -37,20 +37,20 @@ router.get("/orders", isAuth, getOrders);
 
 router.get("/orders/:orderId", isAuth, getOrder);
 
-router.get("/user-details/", isAuth, getUserDetails);
+router.get("/user-details", isAuth, getUserDetails);
 
 router.put(
-  "/user-details/",
-  // validatorsUserDetails,
-  // checkValidation,
+  "/user-details",
+  validatorsUserDetails,
+  checkValidation(),
   isAuth,
   putEditUserDetails
 );
 
 router.put(
   "/change-email",
-  // emailValidator,
-  // checkValidation,
+  emailValidator,
+  checkValidation(),
   isAuth,
   putEditEmail
 );

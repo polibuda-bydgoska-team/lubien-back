@@ -1,5 +1,6 @@
 const { body } = require("express-validator");
 const User = require("../models/user");
+const postalCodes = require("postal-codes-js");
 
 exports.validatorsUserDetails = [
   body("phone")
@@ -10,15 +11,27 @@ exports.validatorsUserDetails = [
   body("firstName").trim().notEmpty().withMessage("First name is required."),
   body("lastName").trim().notEmpty().withMessage("Last name is required."),
   body("companyName").optional().trim(),
-  body("street").trim().notEmpty().withMessage("Street address is required."),
-  body("houseNumber")
+  body("address.street")
+    .trim()
+    .notEmpty()
+    .withMessage("Street address is required."),
+  body("address.houseNumber")
     .trim()
     .notEmpty()
     .withMessage("House number is required."),
-  body("addressAdditionalInfo").optional().trim(),
-  body("city").trim().notEmpty().withMessage("City is required."),
-  body("county").optional().trim(),
-  body("postCode").trim().notEmpty().withMessage("Post code is required."),
+  body("address.addressAdditionalInfo").optional().trim(),
+  body("address.city").trim().notEmpty().withMessage("City is required."),
+  body("address.county").optional().trim(),
+  body("address.postCode")
+    .trim()
+    .notEmpty()
+    .custom((value, { req }) => {
+      if (postalCodes.validate("GB", value) === true) {
+        return true;
+      } else {
+        throw new Error("The postal code is not in British format!");
+      }
+    }),
 ];
 
 exports.emailValidator = [

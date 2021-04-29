@@ -4,19 +4,9 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const authConfig = require("../config/auth");
 const User = require("../models/user");
-const { validationResult } = require("express-validator");
 
 exports.signup = async (req, res, next) => {
   try {
-    const validationErrors = validationResult(req);
-    if (!validationErrors.isEmpty()) {
-      createError(
-        "Validation failed, entered data is incorrect.",
-        422,
-        validationErrors.array()
-      );
-    }
-
     const updates = Object.keys(req.body);
     const allowedUpdates = [
       "email",
