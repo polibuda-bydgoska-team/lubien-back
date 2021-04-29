@@ -30,6 +30,7 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.11.19",
     "multer": "^1.4.2",
+    "postal-codes-js": "^2.5.2",
     "stripe": "^8.138.0",
     "tslib": "^2.1.0",
     "uuid": "^8.3.2",

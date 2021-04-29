@@ -1,4 +1,3 @@
-const { validationResult } = require("express-validator");
 const createError = require("../utils/createError");
 const validateUpdates = require("../utils/validateUpdates");
 const bcrypt = require("bcryptjs");
@@ -8,15 +7,6 @@ const User = require("../models/user");
 
 exports.signup = async (req, res, next) => {
   try {
-    const validationErrors = validationResult(req);
-    if (!validationErrors.isEmpty()) {
-      createError(
-        "Validation failed, entered data is incorrect.",
-        422,
-        validationErrors.array()
-      );
-    }
-
     const updates = Object.keys(req.body);
     const allowedUpdates = [
       "email",
