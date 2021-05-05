@@ -26,7 +26,7 @@ exports.signup = async (req, res, next) => {
     ];
     const areUpdatesValid = validateUpdates(updates, allowedUpdates);
     if (!areUpdatesValid.isOperationValid) {
-      createError("Can't updates this fields", 422, areUpdatesValid.error);
+      createError("Can't update these fields.", 422, areUpdatesValid.error);
     }
 
     const {
@@ -95,7 +95,7 @@ exports.login = async (req, res, next) => {
     const allowedUpdates = ["email", "password"];
     const areUpdatesValid = validateUpdates(updates, allowedUpdates);
     if (!areUpdatesValid.isOperationValid) {
-      createError("Can't updates this fields", 422, areUpdatesValid.error);
+      createError("Can't update these fields.", 422, areUpdatesValid.error);
     }
 
     const { email, password } = req.body;

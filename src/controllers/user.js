@@ -190,7 +190,7 @@ exports.putEditUserDetails = async (req, res, next) => {
     ];
     const areUpdatesValid = validateUpdates(updates, allowedUpdates);
     if (!areUpdatesValid.isOperationValid) {
-      createError("Can't updates this fields", 422, areUpdatesValid.error);
+      createError("Can't update these fields.", 422, areUpdatesValid.error);
     }
 
     const {
@@ -223,7 +223,21 @@ exports.putEditUserDetails = async (req, res, next) => {
 
     await user.save();
 
-    res.status(200).send("User details updated");
+    res.status(200).send({
+      email: user.email,
+      phone: user.phone,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      companyName: user.companyName || "",
+      address: {
+        street: user.address.street,
+        houseNumber: user.address.houseNumber,
+        addressAdditionalInfo: user.address.addressAdditionalInfo || "",
+        city: user.address.city,
+        county: user.address.county || "",
+        postCode: user.address.postCode,
+      },
+    });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -238,7 +252,7 @@ exports.putEditEmail = async (req, res, next) => {
     const allowedUpdates = ["email"];
     const areUpdatesValid = validateUpdates(updates, allowedUpdates);
     if (!areUpdatesValid.isOperationValid) {
-      createError("Can't updates this fields", 422, areUpdatesValid.error);
+      createError("Can't update these fields.", 422, areUpdatesValid.error);
     }
 
     const user = await User.findById(req.userId);
@@ -247,7 +261,7 @@ exports.putEditEmail = async (req, res, next) => {
 
     await user.save();
 
-    res.status(200).send("User email updated");
+    res.status(200).send(user.email);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -266,7 +280,7 @@ exports.putChangePassword = async (req, res, next) => {
     ];
     const areUpdatesValid = validateUpdates(updates, allowedUpdates);
     if (!areUpdatesValid.isOperationValid) {
-      createError("Can't updates this fields", 422, areUpdatesValid.error);
+      createError("Can't update these fields.", 422, areUpdatesValid.error);
     }
 
     const user = await User.findById(req.userId);
