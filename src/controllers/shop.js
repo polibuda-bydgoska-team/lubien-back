@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Product = require("../models/product");
 const Order = require("../models/order");
+const User = require("../models/user");
 const createError = require("../utils/createError");
 const stripe = require("stripe")(process.env.STRIPE_API_KEY);
 
@@ -34,7 +35,7 @@ exports.getProduct = async (req, res, next) => {
 exports.getCheckout = async (req, res, next) => {
   try {
     const user = await User.findById(req.userId)
-      .populate("cart.items.productId")
+      .populate("cart.items.product")
       .exec();
     const products = user.cart.items;
 
@@ -42,11 +43,11 @@ exports.getCheckout = async (req, res, next) => {
       payment_method_types: ["card"],
       line_items: products.map((p) => {
         return {
-          name: p.productId.title,
+          name: p.product.title,
           amount:
             p.size === "large"
-              ? p.productId.price.large * 100
-              : p.productId.price.extraLarge * 100,
+              ? p.product.price.large * 100
+              : p.product.price.extraLarge * 100,
           currency: "GBP",
           quantity: p.quantity,
         };
