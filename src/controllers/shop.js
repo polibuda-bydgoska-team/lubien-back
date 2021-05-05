@@ -56,7 +56,7 @@ exports.getCheckout = async (req, res, next) => {
       client_reference_id: user._id.toString(),
       mode: "payment",
       success_url: "http://localhost:3000/checkout?finished=true",
-      cancel_url: "http://localhost:3000/checkout?finished=true",
+      cancel_url: "http://localhost:3000/checkout?finished=false",
     });
 
     res.send({ id: session.id });
