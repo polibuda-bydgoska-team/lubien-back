@@ -264,10 +264,30 @@ exports.putEditEmail = async (req, res, next) => {
     const user = await User.findById(req.userId);
 
     user.email = req.body.email;
+    user.isVerified = false;
 
     await user.save();
 
-    res.status(200).send("User email updated");
+    const updatedUser = await User.findById(req.userId);
+
+    const token = new Token({
+      userId: user._id,
+      token: crypto.randomBytes(16).toString("hex"),
+    });
+
+    await token.save();
+
+    emailBody = `<p>Please verify your account by clicking this <b><a href="http://${req.headers.host}/user/confirmation/${updatedUser.email}/${token.token}">link</a>.<b></p>`;
+
+    sendEmail(updatedUser.email, "Account Verification Link", emailBody);
+
+    res
+      .status(200)
+      .send({
+        newEmail: updatedUser.email,
+        message:
+          "The verification link has been sent! If you don't see it, check spam or click resend. It will be expire after one day.",
+      });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
