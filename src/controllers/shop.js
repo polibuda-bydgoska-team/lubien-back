@@ -68,21 +68,28 @@ exports.getCheckout = async (req, res, next) => {
   }
 };
 
-exports.webhook = async (req, res, next) => {
+exports.webhook = (req, res, next) => {
   try {
-    const event = req.body;
+    const payload = req.body;
+    const sig = req.headers["stripe-signature"];
 
-    switch (event.type) {
-      case checkout.session.completed:
-        const userIdinString = event.data.object.client_reference_id;
-        const userId = mongoose.Types.ObjectId(userIdinString);
-        checkoutSessionCompleted(userId);
-        break;
-      default:
-        console.log(`Unhandled event type ${event.type}.`);
+    let event;
+
+    try {
+      event = stripe.webhooks.constructEvent(payload, sig);
+    } catch (err) {
+      return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    res.status(200).send();
+    console.log(event);
+
+    if (event.type === "checkout.session.completed") {
+      const userId = event.data.object.client_reference_id;
+      console.log("USER: " + userId);
+      checkoutSessionCompleted(userId);
+    }
+
+    res.status(200);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
