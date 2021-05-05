@@ -190,7 +190,7 @@ exports.putEditUserDetails = async (req, res, next) => {
     ];
     const areUpdatesValid = validateUpdates(updates, allowedUpdates);
     if (!areUpdatesValid.isOperationValid) {
-      createError("Can't updates this fields", 422, areUpdatesValid.error);
+      createError("Can't update these fields.", 422, areUpdatesValid.error);
     }
 
     const {
@@ -252,7 +252,7 @@ exports.putEditEmail = async (req, res, next) => {
     const allowedUpdates = ["email"];
     const areUpdatesValid = validateUpdates(updates, allowedUpdates);
     if (!areUpdatesValid.isOperationValid) {
-      createError("Can't updates this fields", 422, areUpdatesValid.error);
+      createError("Can't update these fields.", 422, areUpdatesValid.error);
     }
 
     const user = await User.findById(req.userId);
@@ -280,7 +280,7 @@ exports.putChangePassword = async (req, res, next) => {
     ];
     const areUpdatesValid = validateUpdates(updates, allowedUpdates);
     if (!areUpdatesValid.isOperationValid) {
-      createError("Can't updates this fields", 422, areUpdatesValid.error);
+      createError("Can't update these fields.", 422, areUpdatesValid.error);
     }
 
     const user = await User.findById(req.userId);
