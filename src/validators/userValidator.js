@@ -62,7 +62,7 @@ exports.newPasswordValidator = [
       /^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$/
     )
     .withMessage(
-      "The new password must contain minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character."
+      "The new password must contain a minimum of eight characters, at least one uppercase letter, one lowercase letter, one number and one special character."
     ),
   body("confirmNewPassword")
     .trim()
