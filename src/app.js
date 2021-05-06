@@ -53,10 +53,10 @@ app.use(adminBro.options.rootPath, routerAdminBro);
 app.use(cors());
 //app.use(express.json());
 app.use((req, res, next) => {
-  if (req.originalUrl.includes("/shop/webhook")) {
+  if (req.originalUrl.startsWith("/shop/webhook")) {
     next();
   } else {
-    express.json({ limit: "1mb" })(req, res, next);
+    express.json()(req, res, next);
   }
 });
 app.use("/auth", authRouter);

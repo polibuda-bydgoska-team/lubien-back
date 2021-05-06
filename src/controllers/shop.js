@@ -69,47 +69,36 @@ exports.getCheckout = async (req, res, next) => {
 };
 
 exports.webhook = (req, res, next) => {
+  const endpointSecret = "whsec_eyqq9tfFJ6Sa95cU7ruLEAw4d2jtjoDc";
+  const sig = req.headers["stripe-signature"];
+  const payload = req.body;
+  let event;
+
   try {
-    const payload = req.body;
-    const sig = req.headers["stripe-signature"];
-
-    let event;
-
-    try {
-      event = stripe.webhooks.constructEvent(payload, sig);
-    } catch (err) {
-      return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
-
-    console.log(event);
-
-    if (event.type === "checkout.session.completed") {
-      const userId = event.data.object.client_reference_id;
-      console.log("USER: " + userId);
-      checkoutSessionCompleted(userId);
-    }
-
-    res.status(200);
-  } catch (error) {
-    if (!error.statusCode) {
-      error.statusCode = 500;
-    }
-    next(error);
+    event = stripe.webhooks.constructEvent(payload, sig, endpointSecret);
+  } catch (err) {
+    return res.status(400).send(`Webhook Error: ${err.message}`);
   }
+
+  if (event.type === "checkout.session.completed") {
+    checkoutSessionCompleted(event.data.object.client_reference_id);
+  }
+
+  res.status(200);
 };
 
 const checkoutSessionCompleted = async (userId) => {
   try {
     const user = await User.findById(userId)
-      .populate("cart.items.productId")
-      .execPopulate();
+      .populate("cart.items.product")
+      .exec();
     let total = 0;
     products = user.cart.items;
     products.forEach((p) => {
-      total += p.quantity * p.productId.price;
+      total += p.quantity * p.product.price;
     });
     const productsToOrder = user.cart.items.map((i) => {
-      return { quantity: i.quantity, product: { ...i.productId._doc } };
+      return { quantity: i.quantity, product: { ...i.product._doc } };
     });
     const order = new Order({
       products: productsToOrder,
