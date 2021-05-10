@@ -115,7 +115,7 @@ exports.getClearCart = async (req, res, next) => {
 
 exports.getOrders = async (req, res, next) => {
   try {
-    const orders = await Order.find({ "user.userId": req.userId });
+    const orders = await Order.find({ "purchaser.userId": req.userId });
     if (!orders) {
       createError("Could not find orders", 404);
     }
@@ -132,7 +132,7 @@ exports.getOrder = async (req, res, next) => {
   try {
     const order = await Order.find({
       _id: req.params.orderId,
-      "user.userId": req.userId,
+      "purchaser.userId": req.userId,
     });
     if (!order) {
       createError("Could not find order", 404);
