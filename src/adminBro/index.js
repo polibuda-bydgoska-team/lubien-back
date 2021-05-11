@@ -4,6 +4,7 @@ const User = require("../models/user");
 const Product = require("../models/product");
 const Order = require("../models/order");
 const userResource = require("./resources/userResource");
+const orderResource = require("./resources/orderResource");
 const { after, before } = require("./actions/passwordActions");
 
 const sidebarGroups = {
@@ -43,6 +44,7 @@ const adminBro = new AdminBro({
     {
       resource: Order,
       options: {
+        ...orderResource,
         parent: sidebarGroups.order,
       },
     },
