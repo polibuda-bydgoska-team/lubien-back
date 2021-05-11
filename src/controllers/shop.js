@@ -4,6 +4,8 @@ const User = require("../models/user");
 const createError = require("../utils/createError");
 const stripe = require("stripe")(process.env.STRIPE_API_KEY);
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+const { customAlphabet } = require("nanoid");
+const nanoid = customAlphabet("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", 6);
 
 exports.getProducts = async (req, res, next) => {
   try {
@@ -126,6 +128,7 @@ const checkoutSessionCompleted = async (userId) => {
       };
     });
     const order = new Order({
+      orderId: nanoid(),
       products: productsToOrder,
       totalPrice: total,
       purchaser: {

@@ -2,6 +2,15 @@ const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema(
   {
+    orderId: {
+      type: String,
+      required: true,
+    },
+    orderStatus: {
+      type: String,
+      enum: ["In progress", "Sent", "Finalized"],
+      default: "In progress",
+    },
     products: [
       {
         title: {
