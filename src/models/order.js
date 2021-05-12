@@ -13,6 +13,10 @@ const orderSchema = new mongoose.Schema(
     },
     products: [
       {
+        productId: {
+          type: String,
+          required: true,
+        },
         title: {
           type: String,
           required: true,

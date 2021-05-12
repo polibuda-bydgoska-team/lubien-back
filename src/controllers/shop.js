@@ -104,6 +104,7 @@ const checkoutSessionCompleted = async (userId) => {
     });
     const productsToOrder = user.cart.items.map((i) => {
       return {
+        productId: i.product._id,
         title: i.product.title,
         price:
           i.size === "large"

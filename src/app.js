@@ -50,7 +50,6 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(adminBro.options.rootPath, routerAdminBro);
-app.use(cors());
 app.use((req, res, next) => {
   if (req.originalUrl.startsWith("/shop/webhook")) {
     next();
@@ -58,6 +57,7 @@ app.use((req, res, next) => {
     express.json()(req, res, next);
   }
 });
+app.use(cors());
 app.use("/auth", authRouter);
 app.use("/shop", shopRouter);
 app.use("/user", userRouter);
