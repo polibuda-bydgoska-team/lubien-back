@@ -6,7 +6,6 @@ const User = require("../models/user");
 const Token = require("../models/token");
 const createError = require("../utils/createError");
 const sendEmail = require("../utils/sendEmail");
-const { validationResult } = require("express-validator/check");
 const validateUpdates = require("../utils/validateUpdates");
 const bcrypt = require("bcryptjs");
 
@@ -38,7 +37,10 @@ exports.postCart = async (req, res, next) => {
     }
     const user = await User.findById(req.userId);
     await user.addToCart(product, productSize, productQuantity);
-    res.status(200).send(product);
+    const updatedUser = await User.findById(req.userId)
+      .populate("cart.items.product")
+      .exec();
+    res.status(200).send(updatedUser.cart.items);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -47,36 +49,30 @@ exports.postCart = async (req, res, next) => {
   }
 };
 
-exports.postIncreaseItemInCart = async (req, res, next) => {
+exports.postCartChangeQuantity = async (req, res, next) => {
   try {
-    const productId = req.body.productId;
-    const productAddValue = req.body.addValue;
-    const product = await Product.findById(productId);
-    if (!product) {
-      createError("Could not find product", 404);
-    }
     const user = await User.findById(req.userId);
-    await user.raiseProductQuantityInCart(product, productAddValue);
-    res.status(200).send(product);
-  } catch (error) {
-    if (!error.statusCode) {
-      error.statusCode = 500;
-    }
-    next(error);
-  }
-};
+    const productsArray = req.body.productsArray;
 
-exports.postReduceItemInCart = async (req, res, next) => {
-  try {
-    const productId = req.body.productId;
-    const productsubtractValue = req.body.subtractValue;
-    const product = await Product.findById(productId);
-    if (!product) {
-      createError("Could not find product", 404);
+    for (const p of productsArray) {
+      const product = await Product.findById(p.productId);
+      if (!product) {
+        createError("Could not find product", 404);
+      }
+      if (p.addValue) {
+        await user.raiseProductQuantityInCart(product, p.size, p.addValue);
+      } else {
+        await user.reduceProductQuantityInCart(
+          product,
+          p.size,
+          p.subtractValue
+        );
+      }
     }
-    const user = await User.findById(req.userId);
-    await user.reduceProductQuantityInCart(product, productsubtractValue);
-    res.status(200).send(product);
+    const updatedUser = await User.findById(req.userId)
+      .populate("cart.items.product")
+      .exec();
+    res.status(200).send(updatedUser.cart.items);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -88,13 +84,16 @@ exports.postReduceItemInCart = async (req, res, next) => {
 exports.postCartDeleteItem = async (req, res, next) => {
   try {
     const productId = req.body.productId;
+    const productSize = req.body.size;
     const product = await Product.findById(productId);
     if (!product) {
       createError("Could not find product", 404);
     }
-    const user = await User.findById(req.userId);
-    await user.removeFromCart(productId);
-    res.status(200).send(product);
+    const user = await User.findById(req.userId)
+      .populate("cart.items.product")
+      .exec();
+    await user.removeFromCart(product, productSize);
+    res.status(200).send(user.cart.items);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -105,9 +104,11 @@ exports.postCartDeleteItem = async (req, res, next) => {
 
 exports.getClearCart = async (req, res, next) => {
   try {
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.userId)
+      .populate("cart.items.product")
+      .exec();
     await user.clearCart();
-    res.status(200).send({ message: "Cart cleared" });
+    res.status(200).send(user.cart.items);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -177,15 +178,6 @@ exports.getUserDetails = async (req, res, next) => {
 
 exports.putEditUserDetails = async (req, res, next) => {
   try {
-    const validationErrors = validationResult(req);
-    if (!validationErrors.isEmpty()) {
-      createError(
-        "Validation failed, entered data is incorrect.",
-        422,
-        validationErrors.array()
-      );
-    }
-
     const updates = Object.keys(req.body);
     const allowedUpdates = [
       "phone",
@@ -202,7 +194,7 @@ exports.putEditUserDetails = async (req, res, next) => {
     ];
     const areUpdatesValid = validateUpdates(updates, allowedUpdates);
     if (!areUpdatesValid.isOperationValid) {
-      createError("Can't updates this fields", 422, areUpdatesValid.error);
+      createError("Can't update these fields.", 422, areUpdatesValid.error);
     }
 
     const {
@@ -235,7 +227,21 @@ exports.putEditUserDetails = async (req, res, next) => {
 
     await user.save();
 
-    res.status(200).send("User details updated");
+    res.status(200).send({
+      email: user.email,
+      phone: user.phone,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      companyName: user.companyName || "",
+      address: {
+        street: user.address.street,
+        houseNumber: user.address.houseNumber,
+        addressAdditionalInfo: user.address.addressAdditionalInfo || "",
+        city: user.address.city,
+        county: user.address.county || "",
+        postCode: user.address.postCode,
+      },
+    });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -246,20 +252,11 @@ exports.putEditUserDetails = async (req, res, next) => {
 
 exports.putEditEmail = async (req, res, next) => {
   try {
-    const validationErrors = validationResult(req);
-    if (!validationErrors.isEmpty()) {
-      createError(
-        "Validation failed, entered data is incorrect.",
-        422,
-        validationErrors.array()
-      );
-    }
-
     const updates = Object.keys(req.body);
     const allowedUpdates = ["email"];
     const areUpdatesValid = validateUpdates(updates, allowedUpdates);
     if (!areUpdatesValid.isOperationValid) {
-      createError("Can't updates this fields", 422, areUpdatesValid.error);
+      createError("Can't update these fields.", 422, areUpdatesValid.error);
     }
 
     const user = await User.findById(req.userId);
@@ -282,13 +279,11 @@ exports.putEditEmail = async (req, res, next) => {
 
     sendEmail(updatedUser.email, "Account Verification Link", emailBody);
 
-    res
-      .status(200)
-      .send({
-        newEmail: updatedUser.email,
-        message:
-          "The verification link has been sent! If you don't see it, check spam or click resend. It will be expire after one day.",
-      });
+    res.status(200).send({
+      newEmail: updatedUser.email,
+      message:
+        "The verification link has been sent! If you don't see it, check spam or click resend. It will be expire after one day.",
+    });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -366,6 +361,7 @@ exports.postResendConfirmationEmail = async (req, res, next) => {
       .send(
         "The verification link has been sent! If you don't see it, check spam or click resend. It will be expire after one day."
       );
+    res.status(200).send(user.email);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -444,6 +440,51 @@ exports.postResetPassword = async (req, res, next) => {
     return res
       .status(201)
       .send("You have successfully reset your password. You can go to login.");
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
+};
+
+exports.putChangePassword = async (req, res, next) => {
+  try {
+    const updates = Object.keys(req.body);
+    const allowedUpdates = [
+      "actualPassword",
+      "newPassword",
+      "confirmNewPassword",
+    ];
+    const areUpdatesValid = validateUpdates(updates, allowedUpdates);
+    if (!areUpdatesValid.isOperationValid) {
+      createError("Can't update these fields.", 422, areUpdatesValid.error);
+    }
+
+    const user = await User.findById(req.userId);
+
+    const { actualPassword, newPassword } = req.body;
+
+    const isActualPasswordValid = await bcrypt.compare(
+      actualPassword,
+      user.password
+    );
+    if (!isActualPasswordValid) {
+      createError("Wrong actual password", 400);
+    }
+
+    const isPasswordsSame = await bcrypt.compare(newPassword, user.password);
+    if (isPasswordsSame) {
+      createError("New password must be different than actual one", 400);
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 12);
+
+    user.password = hashedNewPassword;
+
+    await user.save();
+
+    res.status(200).send("New password is set");
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
