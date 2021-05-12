@@ -8,6 +8,7 @@ const {
   webhook,
 } = require("../controllers/shop");
 const Product = require("../models/product");
+const bodyParser = require("body-parser");
 
 const router = express.Router();
 
@@ -17,6 +18,6 @@ router.get("/products/:productId", getProduct);
 
 router.get("/checkout", isAuth, getCheckout);
 
-router.post("/webhook", webhook);
+router.post("/webhook", bodyParser.raw({ type: "application/json" }), webhook);
 
 module.exports = router;
