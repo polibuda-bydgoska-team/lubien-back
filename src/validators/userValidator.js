@@ -29,7 +29,7 @@ exports.validatorsUserDetails = [
       if (postalCodes.validate("GB", value) === true) {
         return true;
       } else {
-        throw new Error("The postal code is not in British format!");
+        throw new Error("The postal code is not in the British format!");
       }
     }),
 ];
@@ -54,7 +54,7 @@ exports.newPasswordValidator = [
   body("actualPassword")
     .trim()
     .notEmpty()
-    .withMessage("Please write actual password."),
+    .withMessage("Please provide the password."),
   body("newPassword")
     .trim()
     .isLength({ min: 8 })
@@ -67,7 +67,7 @@ exports.newPasswordValidator = [
   body("confirmNewPassword")
     .trim()
     .notEmpty()
-    .withMessage("Please confirm new password."),
+    .withMessage("Please confirm the new password."),
   body("confirmNewPassword")
     .trim()
     .notEmpty()

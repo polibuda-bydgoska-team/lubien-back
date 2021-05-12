@@ -22,7 +22,7 @@ const before = async (request) => {
       throw new ValidationError({
         password: {
           message:
-            "The password must be a minimum of 8 characters, including at least one lowercase letter, one uppercase letter, one number and one character",
+            "The password must contain a minimum of eight characters, at least one uppercase letter, one lowercase letter, one number and one special character.",
         },
       });
     }
@@ -30,7 +30,7 @@ const before = async (request) => {
     if (emailExists) {
       throw new ValidationError({
         email: {
-          message: "This email already exist",
+          message: "This email already exists!",
         },
       });
     }

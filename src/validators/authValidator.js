@@ -24,7 +24,7 @@ exports.registerValidator = [
       /^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$/
     )
     .withMessage(
-      "Password must contains minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character."
+      "The password must contain a minimum of eight characters, at least one uppercase letter, one lowercase letter, one number and one special character."
     ),
   body("confirmPassword")
     .trim()
@@ -65,7 +65,7 @@ exports.registerValidator = [
       if (postalCodes.validate("GB", value) === true) {
         return true;
       } else {
-        throw new Error("The postal code is not in British format!");
+        throw new Error("The postal code is not in the British format!");
       }
     }),
 ];
