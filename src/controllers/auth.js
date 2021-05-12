@@ -95,19 +95,19 @@ exports.login = async (req, res, next) => {
     const allowedUpdates = ["email", "password"];
     const areUpdatesValid = validateUpdates(updates, allowedUpdates);
     if (!areUpdatesValid.isOperationValid) {
-      createError("Can't update these fields.", 422, areUpdatesValid.error);
+      createError("Can't update these fields", 422, areUpdatesValid.error);
     }
 
     const { email, password } = req.body;
 
     const foundUser = await User.findOne({ email });
     if (!foundUser) {
-      createError("No user found with this email", 404);
+      createError("No user found with this email!", 404);
     }
 
     const isPasswordValid = await bcrypt.compare(password, foundUser.password);
     if (!isPasswordValid) {
-      createError("Wrong password", 400);
+      createError("Wrong password!", 400);
     }
 
     const token = jwt.sign(

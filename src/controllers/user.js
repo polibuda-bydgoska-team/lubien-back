@@ -292,12 +292,12 @@ exports.putChangePassword = async (req, res, next) => {
       user.password
     );
     if (!isActualPasswordValid) {
-      createError("Wrong actual password", 400);
+      createError("Wrong current password", 400);
     }
 
     const isPasswordsSame = await bcrypt.compare(newPassword, user.password);
     if (isPasswordsSame) {
-      createError("New password must be different than actual one", 400);
+      createError("New password must be different, than current one", 400);
     }
 
     const hashedNewPassword = await bcrypt.hash(newPassword, 12);
@@ -306,7 +306,7 @@ exports.putChangePassword = async (req, res, next) => {
 
     await user.save();
 
-    res.status(200).send("New password is set");
+    res.status(200).send("New password set");
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;

@@ -7,12 +7,12 @@ module.exports = (req, res, next) => {
     const token = authHeader.split(" ")[1];
 
     if (!token) {
-      createError("Not authenticated. No auth token was provided", 401);
+      createError("Not authenticated. No auth token was provided.", 401);
     }
 
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     if (!decodedToken) {
-      createError("Not authenticated. Error when decodning token", 401);
+      createError("Not authenticated. Error when decodning token.", 401);
     }
 
     req.userId = decodedToken.userId;
