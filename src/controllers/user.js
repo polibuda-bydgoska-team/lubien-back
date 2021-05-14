@@ -8,6 +8,7 @@ const createError = require("../utils/createError");
 const sendEmail = require("../utils/sendEmail");
 const { validationResult } = require("express-validator/check");
 const validateUpdates = require("../utils/validateUpdates");
+const clientURI = process.env.CLIENT_URI || "http://localhost:3000";
 
 exports.getCart = async (req, res, next) => {
   try {
@@ -277,17 +278,15 @@ exports.putEditEmail = async (req, res, next) => {
 
     await token.save();
 
-    emailBody = `<p>Please verify your account by clicking this <b><a href="http://${req.headers.host}/user/confirmation/${updatedUser.email}/${token.token}">link</a>.<b></p>`;
+    emailBody = `<p>Please verify your account by clicking this <b><a href="${clientURI}/user/confirmation/${updatedUser.email}/${token.token}">link</a>.<b></p>`;
 
     sendEmail(updatedUser.email, "Account Verification Link", emailBody);
 
-    res
-      .status(200)
-      .send({
-        newEmail: updatedUser.email,
-        message:
-          "The verification link has been sent! If you don't see it, check spam or click resend. It will be expire after one day.",
-      });
+    res.status(200).send({
+      newEmail: updatedUser.email,
+      message:
+        "The verification link has been sent! If you don't see it, check spam or click resend. It will be expire after one day.",
+    });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -356,7 +355,7 @@ exports.postResendConfirmationEmail = async (req, res, next) => {
 
     await token.save();
 
-    emailBody = `<p>Please verify your account by clicking this <b><a href="http://${req.headers.host}/user/confirmation/${user.email}/${token.token}">link</a>.<b></p>`;
+    emailBody = `<p>Please verify your account by clicking this <b><a href="${clientURI}/user/confirmation/${user.email}/${token.token}">link</a>.<b></p>`;
 
     sendEmail(user.email, "Account Verification Link", emailBody);
 

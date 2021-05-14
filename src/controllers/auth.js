@@ -9,6 +9,7 @@ const jwt = require("jsonwebtoken");
 const authConfig = require("../config/auth");
 const User = require("../models/user");
 const Token = require("../models/token");
+const clientURI = process.env.CLIENT_URI || "http://localhost:3000";
 
 exports.signup = async (req, res, next) => {
   try {
@@ -87,7 +88,7 @@ exports.signup = async (req, res, next) => {
 
     await token.save();
 
-    emailBody = `<p>Please verify your account by clicking this <b><a href="http://${req.headers.host}/user/confirmation/${user.email}/${token.token}">link</a>.<b></p>`;
+    emailBody = `<p>Please verify your account by clicking this <b><a href="${clientURI}/user/confirmation/${user.email}/${token.token}">link</a>.<b></p>`;
 
     sendEmail(user.email, "Account Verification Link", emailBody);
 
