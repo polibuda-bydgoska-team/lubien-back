@@ -97,7 +97,7 @@ exports.signup = async (req, res, next) => {
     return res
       .status(201)
       .send(
-        "The verification link has been sent! If you don't see it, check spam or click resend. It will be expire after one day."
+        "The verification link has been sent! If you don't see it, check spam or click resend. The link will expire after one day."
       );
   } catch (error) {
     if (!error.statusCode) {
@@ -113,7 +113,7 @@ exports.login = async (req, res, next) => {
     const allowedUpdates = ["email", "password"];
     const areUpdatesValid = validateUpdates(updates, allowedUpdates);
     if (!areUpdatesValid.isOperationValid) {
-      createError("Can't updates this fields", 422, areUpdatesValid.error);
+      createError("Can't updates these fields", 422, areUpdatesValid.error);
     }
 
     const { email, password } = req.body;
