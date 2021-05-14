@@ -1,4 +1,6 @@
 const crypto = require("crypto");
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
 
 const { validationResult } = require("express-validator");
 const createError = require("../utils/createError");
@@ -9,6 +11,7 @@ const jwt = require("jsonwebtoken");
 const authConfig = require("../config/auth");
 const User = require("../models/user");
 const Token = require("../models/token");
+const emailRedirectURL = process.env.EMAIL_REDIRECT_URL;
 
 exports.signup = async (req, res, next) => {
   try {
@@ -87,7 +90,7 @@ exports.signup = async (req, res, next) => {
 
     await token.save();
 
-    emailBody = `<p>Please verify your account by clicking this <b><a href="http://${req.headers.host}/user/confirmation/${user.email}/${token.token}">link</a>.<b></p>`;
+    emailBody = `<p>Please verify your account by clicking this <b><a href="http://${emailRedirectURL}/user/confirmation/${user.email}/${token.token}">link</a>.<b></p>`;
 
     sendEmail(user.email, "Account Verification Link", emailBody);
 
