@@ -1,4 +1,6 @@
 const crypto = require("crypto");
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
 
 const { validationResult } = require("express-validator");
 const createError = require("../utils/createError");
