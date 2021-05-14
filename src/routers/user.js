@@ -16,7 +16,6 @@ const {
   postResendConfirmationEmail,
   getResetPassword,
   postResetPassword,
-  putChangePassword,
 } = require("../controllers/user");
 const {
   validatorsUserDetails,
