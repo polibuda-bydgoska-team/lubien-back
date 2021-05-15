@@ -12,6 +12,7 @@ const {
   getUserDetails,
   putEditUserDetails,
   putEditEmail,
+  putChangePassword,
   getConfirmEmail,
   postResendConfirmationEmail,
   getResetPassword,
