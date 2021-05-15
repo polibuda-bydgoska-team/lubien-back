@@ -283,7 +283,7 @@ exports.putEditEmail = async (req, res, next) => {
     res.status(200).send({
       newEmail: updatedUser.email,
       message:
-        "The verification link has been sent! If you don't see it, check spam or click resend. It will be expire after one day.",
+        "The verification link has been sent! If you don't see it, check spam or click resend. It will expire after one day.",
     });
   } catch (error) {
     if (!error.statusCode) {
@@ -299,7 +299,7 @@ exports.getConfirmEmail = async (req, res, next) => {
 
     if (!token) {
       createError(
-        "Your verification link may have expired. Please click on resend for verify your email.",
+        "Your verification link may have expired. Please click on resend to verify your email.",
         400
       );
     }
@@ -311,7 +311,7 @@ exports.getConfirmEmail = async (req, res, next) => {
 
     if (!user) {
       createError(
-        "We were unable to find a user for this verification. Please SignUp!",
+        "We were unable to find a user for this verification. Please sign up!",
         401
       );
     }
@@ -345,7 +345,7 @@ exports.postResendConfirmationEmail = async (req, res, next) => {
     if (user.isVerified) {
       return res
         .status(200)
-        .send("This account has been already verified. Please log in.");
+        .send("This account has already been verified. Please log in.");
     }
 
     const token = new Token({
