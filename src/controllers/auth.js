@@ -84,11 +84,10 @@ exports.signup = async (req, res, next) => {
 
     sendEmail(user.email, "Account Verification Link", emailBody);
 
-    return res
-      .status(201)
-      .send(
-        "The verification link has been sent! If you don't see it, check spam or click resend. It will be expire after one day."
-      );
+    return res.status(201).send({
+      message:
+        "The verification link has been sent! If you don't see it, check spam or click resend. It will be expire after one day.",
+    });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;

@@ -321,7 +321,9 @@ exports.getConfirmEmail = async (req, res, next) => {
 
     await token.delete();
 
-    res.status(200).send("Your account has been successfully verified!");
+    res
+      .status(200)
+      .send({ message: "Your account has been successfully verified!" });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -357,12 +359,10 @@ exports.postResendConfirmationEmail = async (req, res, next) => {
 
     sendEmail(user.email, "Account Verification Link", emailBody);
 
-    return res
-      .status(201)
-      .send(
-        "The verification link has been sent! If you don't see it, check spam or click resend. It will be expire after one day."
-      );
-    res.status(200).send(user.email);
+    return res.status(201).send({
+      message:
+        "The verification link has been sent! If you don't see it, check spam or click resend. It will be expire after one day.",
+    });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -403,11 +403,10 @@ exports.getResetPassword = async (req, res, next) => {
 
     sendEmail(user.email, "Password reset", emailBody);
 
-    return res
-      .status(201)
-      .send(
-        "The reset password link has been sent! If you don't see it, check spam or click resend. It will be expire after one hour."
-      );
+    return res.status(201).send({
+      message:
+        "The reset password link has been sent! If you don't see it, check spam or click resend. It will be expire after one hour.",
+    });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -438,9 +437,10 @@ exports.postResetPassword = async (req, res, next) => {
 
     await resetToken.delete();
 
-    return res
-      .status(201)
-      .send("You have successfully reset your password. You can go to login.");
+    return res.status(201).send({
+      message:
+        "You have successfully reset your password. You can go to login.",
+    });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -485,7 +485,7 @@ exports.putChangePassword = async (req, res, next) => {
 
     await user.save();
 
-    res.status(200).send("New password is set");
+    res.status(200).send({ message: "New password is set" });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -526,11 +526,10 @@ exports.getResetPassword = async (req, res, next) => {
 
     sendEmail(user.email, "Password reset", emailBody);
 
-    return res
-      .status(201)
-      .send(
-        "The reset password link has been sent! If you don't see it, check spam or click resend. It will be expire after one hour."
-      );
+    return res.status(201).send({
+      message:
+        "The reset password link has been sent! If you don't see it, check spam or click resend. It will be expire after one hour.",
+    });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -563,7 +562,10 @@ exports.postResetPassword = async (req, res, next) => {
 
     return res
       .status(201)
-      .send("You have successfully reset your password. You can go to login.");
+      .send({
+        message:
+          "You have successfully reset your password. You can go to login.",
+      });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
