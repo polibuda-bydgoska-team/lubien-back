@@ -109,13 +109,10 @@ exports.login = async (req, res, next) => {
 
     const foundUser = await User.findOne({ email });
     if (!foundUser) {
-      createError("No user found with this email", 404);
+      createError("Wrong password or/and email.", 404);
     }
 
     const isPasswordValid = await bcrypt.compare(password, foundUser.password);
-    if (!isPasswordValid) {
-      createError("Wrong password", 400);
-    }
 
     if (!foundUser.isVerified) {
       createError(
@@ -123,6 +120,10 @@ exports.login = async (req, res, next) => {
         401,
         foundUser.email
       );
+    }
+
+    if (!isPasswordValid) {
+      createError("Wrong password or/and email.", 400);
     }
 
     const token = jwt.sign(
