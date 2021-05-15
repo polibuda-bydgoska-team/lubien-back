@@ -2,7 +2,6 @@ const crypto = require("crypto");
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
 
-const { validationResult } = require("express-validator");
 const createError = require("../utils/createError");
 const validateUpdates = require("../utils/validateUpdates");
 const sendEmail = require("../utils/sendEmail");
@@ -15,15 +14,6 @@ const clientURI = process.env.CLIENT_URI || "http://localhost:3000";
 
 exports.signup = async (req, res, next) => {
   try {
-    const validationErrors = validationResult(req);
-    if (!validationErrors.isEmpty()) {
-      createError(
-        "Validation failed, entered data is incorrect.",
-        422,
-        validationErrors.array()
-      );
-    }
-
     const updates = Object.keys(req.body);
     const allowedUpdates = [
       "email",
@@ -43,7 +33,7 @@ exports.signup = async (req, res, next) => {
     ];
     const areUpdatesValid = validateUpdates(updates, allowedUpdates);
     if (!areUpdatesValid.isOperationValid) {
-      createError("Can't updates this fields", 422, areUpdatesValid.error);
+      createError("Can't update these fields.", 422, areUpdatesValid.error);
     }
 
     const {
@@ -113,7 +103,7 @@ exports.login = async (req, res, next) => {
     const allowedUpdates = ["email", "password"];
     const areUpdatesValid = validateUpdates(updates, allowedUpdates);
     if (!areUpdatesValid.isOperationValid) {
-      createError("Can't updates this fields", 422, areUpdatesValid.error);
+      createError("Can't update these fields.", 422, areUpdatesValid.error);
     }
 
     const { email, password } = req.body;
@@ -149,7 +139,6 @@ exports.login = async (req, res, next) => {
       token: token,
       expirationDate: expirationDate,
       userId: foundUser._id.toString(),
-      userRole: foundUser.role,
     });
   } catch (error) {
     if (!error.statusCode) {

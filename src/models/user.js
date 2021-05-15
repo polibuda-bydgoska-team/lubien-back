@@ -72,8 +72,9 @@ const userSchema = new mongoose.Schema({
 
 userSchema.methods.addToCart = function (product, size, quantity) {
   const cartProductIndex = this.cart.items.findIndex((cp) => {
-    return cp.product.toString() === product._id.toString();
+    return cp.product.toString() === product._id.toString() && cp.size === size;
   });
+
   const updatedCartItems = [...this.cart.items];
 
   if (cartProductIndex >= 0) {
@@ -93,9 +94,13 @@ userSchema.methods.addToCart = function (product, size, quantity) {
   return this.save();
 };
 
-userSchema.methods.raiseProductQuantityInCart = function (product, addValue) {
+userSchema.methods.raiseProductQuantityInCart = function (
+  product,
+  size,
+  addValue
+) {
   const cartProductIndex = this.cart.items.findIndex((cp) => {
-    return cp.product.toString() === product._id.toString();
+    return cp.product.toString() === product._id.toString() && cp.size === size;
   });
   const updatedCartItems = [...this.cart.items];
 
@@ -119,10 +124,11 @@ userSchema.methods.raiseProductQuantityInCart = function (product, addValue) {
 
 userSchema.methods.reduceProductQuantityInCart = function (
   product,
+  size,
   subtractValue
 ) {
   const cartProductIndex = this.cart.items.findIndex((cp) => {
-    return cp.product.toString() === product._id.toString();
+    return cp.product.toString() === product._id.toString() && cp.size === size;
   });
   let updatedCartItems = [...this.cart.items];
 
@@ -133,9 +139,7 @@ userSchema.methods.reduceProductQuantityInCart = function (
   }
 
   if (updatedCartItems[cartProductIndex].quantity <= 0) {
-    updatedCartItems = this.cart.items.filter((item) => {
-      return item.product.toString() !== product._id.toString();
-    });
+    return this.removeFromCart(product, size);
   }
 
   const updatedCart = {
@@ -145,11 +149,13 @@ userSchema.methods.reduceProductQuantityInCart = function (
   return this.save();
 };
 
-userSchema.methods.removeFromCart = function (productId) {
-  const updatedCartItems = this.cart.items.filter((item) => {
-    return item.product.toString() !== productId.toString();
+userSchema.methods.removeFromCart = function (product, size) {
+  const cartProductIndex = this.cart.items.findIndex((cp) => {
+    return cp.product.toString() === product._id.toString() && cp.size === size;
   });
-  this.cart.items = updatedCartItems;
+
+  this.cart.items.splice(cartProductIndex, 1);
+
   return this.save();
 };
 

@@ -1,6 +1,11 @@
 const orderResource = {
   properties: {
-    edit: false,
+    _id: {
+      isVisible: {
+        show: false,
+        list: false,
+      },
+    },
   },
 };
 

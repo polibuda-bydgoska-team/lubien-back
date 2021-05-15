@@ -13,9 +13,11 @@ function paginatedResults(model) {
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
 
-    const results = {};
+    const documentsAmount = await model.countDocuments().exec();
 
-    if (endIndex < (await model.countDocuments().exec())) {
+    const results = { documentsAmount: documentsAmount };
+
+    if (endIndex < documentsAmount) {
       results.next = {
         page: page + 1,
         limit: limit,
