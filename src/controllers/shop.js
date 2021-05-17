@@ -1,9 +1,11 @@
-const mongoose = require("mongoose");
 const Product = require("../models/product");
 const Order = require("../models/order");
 const User = require("../models/user");
 const createError = require("../utils/createError");
 const stripe = require("stripe")(process.env.STRIPE_API_KEY);
+const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+const { customAlphabet } = require("nanoid");
+const nanoid = customAlphabet("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", 6);
 
 exports.getProducts = async (req, res, next) => {
   try {
@@ -68,49 +70,82 @@ exports.getCheckout = async (req, res, next) => {
   }
 };
 
-exports.webhook = async (req, res, next) => {
+exports.webhook = (req, res, next) => {
+  const sig = req.headers["stripe-signature"];
+  const payload = req.body;
+  let event;
+
   try {
-    const event = req.body;
-
-    switch (event.type) {
-      case checkout.session.completed:
-        const userIdinString = event.data.object.client_reference_id;
-        const userId = mongoose.Types.ObjectId(userIdinString);
-        checkoutSessionCompleted(userId);
-        break;
-      default:
-        console.log(`Unhandled event type ${event.type}.`);
-    }
-
-    res.status(200).send();
-  } catch (error) {
-    if (!error.statusCode) {
-      error.statusCode = 500;
-    }
-    next(error);
+    event = stripe.webhooks.constructEvent(payload, sig, stripeWebhookSecret);
+  } catch (err) {
+    return res.status(400).send(`Webhook Error: ${err.message}`);
   }
+
+  if (event.type === "checkout.session.completed") {
+    checkoutSessionCompleted(event.data.object.client_reference_id);
+  }
+
+  res.status(200);
 };
 
 const checkoutSessionCompleted = async (userId) => {
   try {
     const user = await User.findById(userId)
-      .populate("cart.items.productId")
-      .execPopulate();
+      .populate("cart.items.product")
+      .exec();
     let total = 0;
     products = user.cart.items;
     products.forEach((p) => {
-      total += p.quantity * p.productId.price;
+      if (p.size === "large") {
+        total += p.quantity * p.product.price.large;
+      } else {
+        total += p.quantity * p.product.price.extraLarge;
+      }
     });
     const productsToOrder = user.cart.items.map((i) => {
-      return { quantity: i.quantity, product: { ...i.productId._doc } };
+      return {
+        productId: i.product._id,
+        title: i.product.title,
+        price:
+          i.size === "large"
+            ? i.product.price.large
+            : i.product.price.extraLarge,
+        quantity: i.quantity,
+        size: i.size,
+        burnTime:
+          i.size === "large"
+            ? i.product.burnTime.large
+            : i.product.burnTime.extraLarge,
+        mainNotes: i.product.mainNotes,
+        scentInspiration: i.product.scentInspiration,
+        location: i.product.location,
+        scentProfile: i.product.scentProfile,
+        topNotes: i.product.topNotes,
+        heartNotes: i.product.heartNotes,
+        baseNotes: i.product.baseNotes,
+        description: i.product.description,
+        seriesName: i.product.seriesName,
+        imagesURL: i.product.imagesURL,
+      };
     });
     const order = new Order({
+      orderId: nanoid(),
       products: productsToOrder,
       totalPrice: total,
-      user: {
-        email: user.email,
-        address: user.address,
+      purchaser: {
         userId: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
+        email: user.email,
+      },
+      deliveryAddress: {
+        street: user.address.street,
+        houseNumber: user.address.houseNumber,
+        addressAdditionalInfo: user.address.addressAdditionalInfo,
+        city: user.address.city,
+        county: user.address.county,
+        postCode: user.address.postCode,
       },
     });
     await order.save();
