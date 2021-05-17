@@ -116,7 +116,7 @@ exports.login = async (req, res, next) => {
 
     if (!foundUser.isVerified) {
       createError(
-        "Your email has not been verified. Please click on resend.",
+        "Your email has not been verified. Check if you have a verification email in your e-mail box. If you don't have it - click resend.",
         401,
         foundUser.email
       );

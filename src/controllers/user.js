@@ -371,13 +371,58 @@ exports.postResendConfirmationEmail = async (req, res, next) => {
   }
 };
 
+exports.putChangePassword = async (req, res, next) => {
+  try {
+    const updates = Object.keys(req.body);
+    const allowedUpdates = [
+      "actualPassword",
+      "newPassword",
+      "confirmNewPassword",
+    ];
+    const areUpdatesValid = validateUpdates(updates, allowedUpdates);
+    if (!areUpdatesValid.isOperationValid) {
+      createError("Can't update these fields.", 422, areUpdatesValid.error);
+    }
+
+    const user = await User.findById(req.userId);
+
+    const { actualPassword, newPassword } = req.body;
+
+    const isActualPasswordValid = await bcrypt.compare(
+      actualPassword,
+      user.password
+    );
+    if (!isActualPasswordValid) {
+      createError("Wrong actual password", 400);
+    }
+
+    const isPasswordsSame = await bcrypt.compare(newPassword, user.password);
+    if (isPasswordsSame) {
+      createError("New password must be different than actual one", 400);
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 12);
+
+    user.password = hashedNewPassword;
+
+    await user.save();
+
+    res.status(200).send({ message: "New password is set" });
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
+};
+
 exports.getResetPassword = async (req, res, next) => {
   try {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
       createError(
-        "We were unable to find a user with that email. Make sure your email is correct!",
-        401
+        "If the address you entered is correct, we will send an email with a link to reset your password.",
+        200
       );
     }
 
@@ -441,131 +486,6 @@ exports.postResetPassword = async (req, res, next) => {
       message:
         "You have successfully reset your password. You can go to login.",
     });
-  } catch (error) {
-    if (!error.statusCode) {
-      error.statusCode = 500;
-    }
-    next(error);
-  }
-};
-
-exports.putChangePassword = async (req, res, next) => {
-  try {
-    const updates = Object.keys(req.body);
-    const allowedUpdates = [
-      "actualPassword",
-      "newPassword",
-      "confirmNewPassword",
-    ];
-    const areUpdatesValid = validateUpdates(updates, allowedUpdates);
-    if (!areUpdatesValid.isOperationValid) {
-      createError("Can't update these fields.", 422, areUpdatesValid.error);
-    }
-
-    const user = await User.findById(req.userId);
-
-    const { actualPassword, newPassword } = req.body;
-
-    const isActualPasswordValid = await bcrypt.compare(
-      actualPassword,
-      user.password
-    );
-    if (!isActualPasswordValid) {
-      createError("Wrong actual password", 400);
-    }
-
-    const isPasswordsSame = await bcrypt.compare(newPassword, user.password);
-    if (isPasswordsSame) {
-      createError("New password must be different than actual one", 400);
-    }
-
-    const hashedNewPassword = await bcrypt.hash(newPassword, 12);
-
-    user.password = hashedNewPassword;
-
-    await user.save();
-
-    res.status(200).send({ message: "New password is set" });
-  } catch (error) {
-    if (!error.statusCode) {
-      error.statusCode = 500;
-    }
-    next(error);
-  }
-};
-
-exports.getResetPassword = async (req, res, next) => {
-  try {
-    const user = await User.findOne({ email: req.body.email });
-    if (!user) {
-      createError(
-        "We were unable to find a user with that email. Make sure your email is correct!",
-        401
-      );
-    }
-
-    const token = await Token.findOne({ userId: user._id });
-    if (token) {
-      await token.delete();
-    }
-
-    const linkToken = crypto.randomBytes(32).toString("hex");
-    const hashToken = await bcrypt.hash(linkToken, 12);
-
-    const expiresTokenDate = new Date();
-
-    const resetToken = new Token({
-      userId: user._id,
-      token: hashToken,
-      expireAt: expiresTokenDate.setHours(expiresTokenDate.getHours() + 1),
-    });
-
-    await resetToken.save();
-
-    emailBody = `<p>You can reset your password by clicking this <b><a href="${clientURI}/user/reset-password/${user._id}/${linkToken}">link</a>.<b></p>`;
-
-    sendEmail(user.email, "Password reset", emailBody);
-
-    return res.status(201).send({
-      message:
-        "The reset password link has been sent! If you don't see it, check spam or click resend. It will be expire after one hour.",
-    });
-  } catch (error) {
-    if (!error.statusCode) {
-      error.statusCode = 500;
-    }
-    next(error);
-  }
-};
-
-exports.postResetPassword = async (req, res, next) => {
-  try {
-    const resetToken = await Token.findOne({ userId: req.params.userId });
-    if (!resetToken) {
-      createError("Invalid or expired password reset link!", 401);
-    }
-
-    const isValid = await bcrypt.compare(req.params.token, resetToken.token);
-    if (!isValid) {
-      createError("Invalid or expired password reset link!", 401);
-    }
-
-    const newHashedPwd = await bcrypt.hash(req.body.password, 12);
-
-    await User.updateOne(
-      { _id: req.params.userId },
-      { $set: { password: newHashedPwd } },
-      { new: true }
-    );
-
-    await resetToken.delete();
-
-    return res
-      .status(201)
-      .send({
-        message:
-          "You have successfully reset your password. You can go to login.",
-      });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
