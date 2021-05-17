@@ -1,16 +1,9 @@
-const crypto = require("crypto");
-const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, "../../.env") });
-
 const createError = require("../utils/createError");
 const validateUpdates = require("../utils/validateUpdates");
-const sendEmail = require("../utils/sendEmail");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const authConfig = require("../config/auth");
 const User = require("../models/user");
-const Token = require("../models/token");
-const clientURI = process.env.CLIENT_URI || "http://localhost:3000";
 
 exports.signup = async (req, res, next) => {
   try {
@@ -73,20 +66,20 @@ exports.signup = async (req, res, next) => {
 
     await user.save();
 
-    const token = new Token({
-      userId: user._id,
-      token: crypto.randomBytes(16).toString("hex"),
-    });
+    const token = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET,
+      authConfig
+    );
 
-    await token.save();
-
-    emailBody = `<p>Please verify your account by clicking this <b><a href="${clientURI}/user/confirmation/${user.email}/${token.token}">link</a>.<b></p>`;
-
-    sendEmail(user.email, "Account Verification Link", emailBody);
+    const decodedToken = jwt.decode(token, { complete: true });
+    const expirationDateInJWT = decodedToken.payload.exp;
+    const expirationDate = new Date(expirationDateInJWT * 1000);
 
     return res.status(201).send({
-      message:
-        "The verification link has been sent! If you don't see it, check spam or click resend. It will be expire after one day.",
+      token: token,
+      expirationDate: expirationDate,
+      userId: user._id.toString(),
     });
   } catch (error) {
     if (!error.statusCode) {
@@ -109,21 +102,12 @@ exports.login = async (req, res, next) => {
 
     const foundUser = await User.findOne({ email });
     if (!foundUser) {
-      createError("Wrong password or/and email.", 404);
+      createError("No user found with this email!", 404);
     }
 
     const isPasswordValid = await bcrypt.compare(password, foundUser.password);
-
-    if (!foundUser.isVerified) {
-      createError(
-        "Your email has not been verified. Check if you have a verification email in your e-mail box. If you don't have it - click resend.",
-        401,
-        foundUser.email
-      );
-    }
-
     if (!isPasswordValid) {
-      createError("Wrong password or/and email.", 400);
+      createError("Wrong password!", 400);
     }
 
     const token = jwt.sign(
@@ -140,6 +124,7 @@ exports.login = async (req, res, next) => {
       token: token,
       expirationDate: expirationDate,
       userId: foundUser._id.toString(),
+      userRole: foundUser.role,
     });
   } catch (error) {
     if (!error.statusCode) {

@@ -1,14 +1,9 @@
-const crypto = require("crypto");
-
 const Order = require("../models/order");
 const Product = require("../models/product");
 const User = require("../models/user");
-const Token = require("../models/token");
 const createError = require("../utils/createError");
-const sendEmail = require("../utils/sendEmail");
 const validateUpdates = require("../utils/validateUpdates");
 const bcrypt = require("bcryptjs");
-const clientURI = process.env.CLIENT_URI || "http://localhost:3000";
 
 exports.getCart = async (req, res, next) => {
   try {
@@ -120,7 +115,7 @@ exports.getClearCart = async (req, res, next) => {
 
 exports.getOrders = async (req, res, next) => {
   try {
-    const orders = await Order.find({ "purchaser.userId": req.userId });
+    const orders = await Order.find({ "user.userId": req.userId });
     if (!orders) {
       createError("Could not find orders", 404);
     }
@@ -137,7 +132,7 @@ exports.getOrder = async (req, res, next) => {
   try {
     const order = await Order.find({
       _id: req.params.orderId,
-      "purchaser.userId": req.userId,
+      "user.userId": req.userId,
     });
     if (!order) {
       createError("Could not find order", 404);
@@ -263,106 +258,10 @@ exports.putEditEmail = async (req, res, next) => {
     const user = await User.findById(req.userId);
 
     user.email = req.body.email;
-    user.isVerified = false;
 
     await user.save();
 
-    const updatedUser = await User.findById(req.userId);
-
-    const token = new Token({
-      userId: user._id,
-      token: crypto.randomBytes(16).toString("hex"),
-    });
-
-    await token.save();
-
-    emailBody = `<p>Please verify your account by clicking this <b><a href="${clientURI}/user/confirmation/${updatedUser.email}/${token.token}">link</a>.<b></p>`;
-
-    sendEmail(updatedUser.email, "Account Verification Link", emailBody);
-
-    res.status(200).send({
-      newEmail: updatedUser.email,
-      message:
-        "The verification link has been sent! If you don't see it, check spam or click resend. It will expire after one day.",
-    });
-  } catch (error) {
-    if (!error.statusCode) {
-      error.statusCode = 500;
-    }
-    next(error);
-  }
-};
-
-exports.getConfirmEmail = async (req, res, next) => {
-  try {
-    const token = await Token.findOne({ token: req.params.token });
-
-    if (!token) {
-      createError(
-        "Your verification link may have expired. Please click on resend to verify your email.",
-        400
-      );
-    }
-
-    const user = await User.findOne({
-      _id: token.userId,
-      email: req.params.email,
-    });
-
-    if (!user) {
-      createError(
-        "We were unable to find a user for this verification. Please sign up!",
-        401
-      );
-    }
-
-    user.isVerified = true;
-    await user.save();
-
-    await token.delete();
-
-    res
-      .status(200)
-      .send({ message: "Your account has been successfully verified!" });
-  } catch (error) {
-    if (!error.statusCode) {
-      error.statusCode = 500;
-    }
-    next(error);
-  }
-};
-
-exports.postResendConfirmationEmail = async (req, res, next) => {
-  try {
-    const user = await User.findOne({ email: req.body.email });
-    if (!user) {
-      createError(
-        "We were unable to find a user with that email. Make sure your email is correct!",
-        401
-      );
-    }
-
-    if (user.isVerified) {
-      return res
-        .status(200)
-        .send("This account has already been verified. Please log in.");
-    }
-
-    const token = new Token({
-      userId: user._id,
-      token: crypto.randomBytes(16).toString("hex"),
-    });
-
-    await token.save();
-
-    emailBody = `<p>Please verify your account by clicking this <b><a href="${clientURI}/user/confirmation/${user.email}/${token.token}">link</a>.<b></p>`;
-
-    sendEmail(user.email, "Account Verification Link", emailBody);
-
-    return res.status(201).send({
-      message:
-        "The verification link has been sent! If you don't see it, check spam or click resend. It will be expire after one day.",
-    });
+    res.status(200).send(user.email);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
@@ -407,85 +306,7 @@ exports.putChangePassword = async (req, res, next) => {
 
     await user.save();
 
-    res.status(200).send({ message: "New password is set" });
-  } catch (error) {
-    if (!error.statusCode) {
-      error.statusCode = 500;
-    }
-    next(error);
-  }
-};
-
-exports.postResetPassword = async (req, res, next) => {
-  try {
-    const user = await User.findOne({ email: req.body.email });
-    if (!user) {
-      createError(
-        "If the address you entered is correct, we will send an email with a link to reset your password.",
-        200
-      );
-    }
-
-    const token = await Token.findOne({ userId: user._id });
-    if (token) {
-      await token.delete();
-    }
-
-    const linkToken = crypto.randomBytes(32).toString("hex");
-    const hashToken = await bcrypt.hash(linkToken, 12);
-
-    const expiresTokenDate = new Date();
-
-    const resetToken = new Token({
-      userId: user._id,
-      token: hashToken,
-      expireAt: expiresTokenDate.setHours(expiresTokenDate.getHours() + 1),
-    });
-
-    await resetToken.save();
-
-    emailBody = `<p>You can reset your password by clicking this <b><a href="${clientURI}/user/reset-password/${user._id}/${linkToken}">link</a>.<b></p>`;
-
-    sendEmail(user.email, "Password reset", emailBody);
-
-    return res.status(201).send({
-      message:
-        "The reset password link has been sent! If you don't see it, check spam or click resend. It will be expire after one hour.",
-    });
-  } catch (error) {
-    if (!error.statusCode) {
-      error.statusCode = 500;
-    }
-    next(error);
-  }
-};
-
-exports.postResetPasswordToken = async (req, res, next) => {
-  try {
-    const resetToken = await Token.findOne({ userId: req.params.userId });
-    if (!resetToken) {
-      createError("Invalid or expired password reset link!", 401);
-    }
-
-    const isValid = await bcrypt.compare(req.params.token, resetToken.token);
-    if (!isValid) {
-      createError("Invalid or expired password reset link!", 401);
-    }
-
-    const newHashedPwd = await bcrypt.hash(req.body.password, 12);
-
-    await User.updateOne(
-      { _id: req.params.userId },
-      { $set: { password: newHashedPwd } },
-      { new: true }
-    );
-
-    await resetToken.delete();
-
-    return res.status(201).send({
-      message:
-        "You have successfully reset your password. You can go to login.",
-    });
+    res.status(200).send("New password set");
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
