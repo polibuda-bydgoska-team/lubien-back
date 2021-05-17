@@ -15,8 +15,8 @@ const {
   putChangePassword,
   getConfirmEmail,
   postResendConfirmationEmail,
-  getResetPassword,
   postResetPassword,
+  postResetPasswordToken,
 } = require("../controllers/user");
 const {
   validatorsUserDetails,
@@ -70,8 +70,8 @@ router.get("/confirmation/:email/:token", getConfirmEmail);
 
 router.post("/confirmation/resend", postResendConfirmationEmail);
 
-router.get("/reset-password", getResetPassword);
+router.post("/reset-password", postResetPassword);
 
-router.post("/reset-password/:userId/:token", postResetPassword);
+router.post("/reset-password/:userId/:token", postResetPasswordToken);
 
 module.exports = router;

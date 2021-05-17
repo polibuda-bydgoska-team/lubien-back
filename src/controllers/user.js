@@ -416,7 +416,7 @@ exports.putChangePassword = async (req, res, next) => {
   }
 };
 
-exports.getResetPassword = async (req, res, next) => {
+exports.postResetPassword = async (req, res, next) => {
   try {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
@@ -460,7 +460,7 @@ exports.getResetPassword = async (req, res, next) => {
   }
 };
 
-exports.postResetPassword = async (req, res, next) => {
+exports.postResetPasswordToken = async (req, res, next) => {
   try {
     const resetToken = await Token.findOne({ userId: req.params.userId });
     if (!resetToken) {
