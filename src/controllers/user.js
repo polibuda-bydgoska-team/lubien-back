@@ -283,7 +283,7 @@ exports.putEditEmail = async (req, res, next) => {
     res.status(200).send({
       newEmail: updatedUser.email,
       message:
-        "The verification link has been sent! If you don't see it, check spam or click resend. It will expire after one day.",
+        "If the address you entered is correct, we will send an email with a link to activate your account. Link will expire after one day.",
     });
   } catch (error) {
     if (!error.statusCode) {
@@ -311,8 +311,8 @@ exports.getConfirmEmail = async (req, res, next) => {
 
     if (!user) {
       createError(
-        "We were unable to find a user for this verification. Please sign up!",
-        401
+        "Your verification link may have expired. Please click on resend to verify your email.",
+        400
       );
     }
 
@@ -337,7 +337,7 @@ exports.postResendConfirmationEmail = async (req, res, next) => {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
       createError(
-        "We were unable to find a user with that email. Make sure your email is correct!",
+        "If the address you entered is correct, we will send an email with a link to activate your account. Link will expire after one day.",
         401
       );
     }
@@ -359,9 +359,9 @@ exports.postResendConfirmationEmail = async (req, res, next) => {
 
     sendEmail(user.email, "Account Verification Link", emailBody);
 
-    return res.status(201).send({
+    return res.status(200).send({
       message:
-        "The verification link has been sent! If you don't see it, check spam or click resend. It will be expire after one day.",
+        "If the address you entered is correct, we will send an email with a link to activate your account. Link will expire after one day.",
     });
   } catch (error) {
     if (!error.statusCode) {
@@ -421,7 +421,7 @@ exports.postResetPassword = async (req, res, next) => {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
       createError(
-        "If the address you entered is correct, we will send an email with a link to reset your password.",
+        "If the address you entered is correct, we will send an email with a link to reset your password. Link will expire after one hour.",
         200
       );
     }
@@ -448,9 +448,9 @@ exports.postResetPassword = async (req, res, next) => {
 
     sendEmail(user.email, "Password reset", emailBody);
 
-    return res.status(201).send({
+    return res.status(200).send({
       message:
-        "The reset password link has been sent! If you don't see it, check spam or click resend. It will be expire after one hour.",
+        "If the address you entered is correct, we will send an email with a link to reset your password. Link will expire after one hour.",
     });
   } catch (error) {
     if (!error.statusCode) {
@@ -482,7 +482,7 @@ exports.postResetPasswordToken = async (req, res, next) => {
 
     await resetToken.delete();
 
-    return res.status(201).send({
+    return res.status(200).send({
       message:
         "You have successfully reset your password. You can go to login.",
     });
