@@ -78,3 +78,29 @@ exports.newPasswordValidator = [
       return true;
     }),
 ];
+
+exports.resetPasswordValidator = [
+  body("password").trim().notEmpty().withMessage("Password is required."),
+  body("password")
+    .trim()
+    .isLength({ min: 8 })
+    .matches(
+      /^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$/
+    )
+    .withMessage(
+      "Password must contains minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character."
+    ),
+  body("confirmPassword")
+    .trim()
+    .notEmpty()
+    .withMessage("Please confirm password."),
+  body("confirmPassword")
+    .trim()
+    .notEmpty()
+    .custom((value, { req }) => {
+      if (value !== req.body.password) {
+        throw new Error("Passwords have to match!");
+      }
+      return true;
+    }),
+];
