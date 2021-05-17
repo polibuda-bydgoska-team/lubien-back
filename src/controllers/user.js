@@ -337,7 +337,7 @@ exports.postResendConfirmationEmail = async (req, res, next) => {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
       createError(
-        "If the address you entered is correct, we will send an email with a link to activate your account.",
+        "If the address you entered is correct, we will send an email with a link to activate your account. Link will be expire after one day.",
         401
       );
     }
@@ -421,7 +421,7 @@ exports.postResetPassword = async (req, res, next) => {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
       createError(
-        "If the address you entered is correct, we will send an email with a link to reset your password.",
+        "If the address you entered is correct, we will send an email with a link to reset your password. Link will be expire after one hour.",
         200
       );
     }
