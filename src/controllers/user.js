@@ -283,7 +283,7 @@ exports.putEditEmail = async (req, res, next) => {
     res.status(200).send({
       newEmail: updatedUser.email,
       message:
-        "If the address you entered is correct, we will send an email with a link to activate your account. Link will be expire after one day.",
+        "If the address you entered is correct, we will send an email with a link to activate your account. Link will expire after one day.",
     });
   } catch (error) {
     if (!error.statusCode) {
@@ -337,7 +337,7 @@ exports.postResendConfirmationEmail = async (req, res, next) => {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
       createError(
-        "If the address you entered is correct, we will send an email with a link to activate your account. Link will be expire after one day.",
+        "If the address you entered is correct, we will send an email with a link to activate your account. Link will expire after one day.",
         401
       );
     }
@@ -361,7 +361,7 @@ exports.postResendConfirmationEmail = async (req, res, next) => {
 
     return res.status(200).send({
       message:
-        "If the address you entered is correct, we will send an email with a link to activate your account. Link will be expire after one day.",
+        "If the address you entered is correct, we will send an email with a link to activate your account. Link will expire after one day.",
     });
   } catch (error) {
     if (!error.statusCode) {
@@ -421,7 +421,7 @@ exports.postResetPassword = async (req, res, next) => {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
       createError(
-        "If the address you entered is correct, we will send an email with a link to reset your password. Link will be expire after one hour.",
+        "If the address you entered is correct, we will send an email with a link to reset your password. Link will expire after one hour.",
         200
       );
     }
@@ -450,7 +450,7 @@ exports.postResetPassword = async (req, res, next) => {
 
     return res.status(200).send({
       message:
-        "If the address you entered is correct, we will send an email with a link to reset your password. Link will be expire after one hour.",
+        "If the address you entered is correct, we will send an email with a link to reset your password. Link will expire after one hour.",
     });
   } catch (error) {
     if (!error.statusCode) {

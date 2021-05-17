@@ -86,7 +86,7 @@ exports.signup = async (req, res, next) => {
 
     return res.status(201).send({
       message:
-        "If the address you entered is correct, we will send an email with a link to activate your account. Link will be expire after one day.",
+        "If the address you entered is correct, we will send an email with a link to activate your account. Link will expire after one day.",
     });
   } catch (error) {
     if (!error.statusCode) {
