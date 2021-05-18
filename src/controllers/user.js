@@ -5,10 +5,10 @@ const Product = require("../models/product");
 const User = require("../models/user");
 const Token = require("../models/token");
 const createError = require("../utils/createError");
-const sendEmail = require("../utils/sendEmail");
+const sendVerificationEmail = require("../utils/emails/sendVerificationEmail");
+const sendResetPswEmail = require("../utils/emails/sendResetPswEmail");
 const validateUpdates = require("../utils/validateUpdates");
 const bcrypt = require("bcryptjs");
-const clientURI = process.env.CLIENT_URI || "http://localhost:3000";
 
 exports.getCart = async (req, res, next) => {
   try {
@@ -276,9 +276,7 @@ exports.putEditEmail = async (req, res, next) => {
 
     await token.save();
 
-    emailBody = `<p>Please verify your account by clicking this <b><a href="${clientURI}/user/confirmation/${updatedUser.email}/${token.token}">link</a>.<b></p>`;
-
-    sendEmail(updatedUser.email, "Account Verification Link", emailBody);
+    sendVerificationEmail(updatedUser.email, token.token);
 
     res.status(200).send({
       newEmail: updatedUser.email,
@@ -355,9 +353,7 @@ exports.postResendConfirmationEmail = async (req, res, next) => {
 
     await token.save();
 
-    emailBody = `<p>Please verify your account by clicking this <b><a href="${clientURI}/user/confirmation/${user.email}/${token.token}">link</a>.<b></p>`;
-
-    sendEmail(user.email, "Account Verification Link", emailBody);
+    sendVerificationEmail(user.email, token.token);
 
     return res.status(200).send({
       message:
@@ -444,9 +440,7 @@ exports.postResetPassword = async (req, res, next) => {
 
     await resetToken.save();
 
-    emailBody = `<p>You can reset your password by clicking this <b><a href="${clientURI}/user/reset-password/${user._id}/${linkToken}">link</a>.<b></p>`;
-
-    sendEmail(user.email, "Password reset", emailBody);
+    sendResetPswEmail(user.email, user._id, linkToken);
 
     return res.status(200).send({
       message:
