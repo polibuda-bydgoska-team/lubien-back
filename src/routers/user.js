@@ -22,6 +22,7 @@ const {
   validatorsUserDetails,
   emailValidator,
   newPasswordValidator,
+  resetPasswordValidator,
 } = require("../validators/userValidator");
 
 const router = express.Router();
@@ -72,6 +73,11 @@ router.post("/confirmation/resend", postResendConfirmationEmail);
 
 router.post("/reset-password", postResetPassword);
 
-router.post("/reset-password/:userId/:token", postResetPasswordToken);
+router.post(
+  "/reset-password/:userId/:token",
+  resetPasswordValidator,
+  checkValidation(),
+  postResetPasswordToken
+);
 
 module.exports = router;
