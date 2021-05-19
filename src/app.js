@@ -2,6 +2,7 @@ const path = require("path");
 
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
 require("./db/db-connection");
 const bcrypt = require("bcryptjs");
 const { limiter } = require("./config/rateLimits");
@@ -58,6 +59,7 @@ app.use((req, res, next) => {
     express.json()(req, res, next);
   }
 });
+app.use(helmet());
 app.use(cors());
 app.use(limiter);
 app.use("/auth", authRouter);
