@@ -4,6 +4,7 @@ const express = require("express");
 const cors = require("cors");
 require("./db/db-connection");
 const bcrypt = require("bcryptjs");
+const { limiter } = require("./config/rateLimits");
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 const MongoStore = require("connect-mongo");
 
@@ -58,6 +59,7 @@ app.use((req, res, next) => {
   }
 });
 app.use(cors());
+app.use(limiter);
 app.use("/auth", authRouter);
 app.use("/shop", shopRouter);
 app.use("/user", userRouter);

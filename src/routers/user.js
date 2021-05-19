@@ -24,6 +24,10 @@ const {
   newPasswordValidator,
   resetPasswordValidator,
 } = require("../validators/userValidator");
+const {
+  confirmationEmailResendLimiter,
+  passwordResetLimiter,
+} = require("../config/rateLimits");
 
 const router = express.Router();
 
@@ -69,9 +73,13 @@ router.put(
 
 router.get("/confirmation/:email/:token", getConfirmEmail);
 
-router.post("/confirmation/resend", postResendConfirmationEmail);
+router.post(
+  "/confirmation/resend",
+  confirmationEmailResendLimiter,
+  postResendConfirmationEmail
+);
 
-router.post("/reset-password", postResetPassword);
+router.post("/reset-password", passwordResetLimiter, postResetPassword);
 
 router.post(
   "/reset-password/:userId/:token",
