@@ -6,6 +6,7 @@ const stripe = require("stripe")(process.env.STRIPE_API_KEY);
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 const { customAlphabet } = require("nanoid");
 const nanoid = customAlphabet("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", 6);
+const sendOrderEmail = require("../utils/emails/sendOrderEmail");
 
 exports.getProducts = async (req, res, next) => {
   try {
@@ -150,6 +151,13 @@ const checkoutSessionCompleted = async (userId) => {
     });
     await order.save();
     user.clearCart();
+    sendOrderEmail(
+      user.email,
+      user.firstName,
+      order.orderId,
+      order.totalPrice,
+      order.products
+    );
   } catch (error) {
     console.log(error);
   }

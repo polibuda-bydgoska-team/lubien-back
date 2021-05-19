@@ -9,13 +9,4 @@ const transporter = nodemailer.createTransport(
   })
 );
 
-const sendEmail = (userEmail, subject, htmlBody) => {
-  transporter.sendMail({
-    to: userEmail,
-    from: "adibu8@gmail.com",
-    subject: subject,
-    html: htmlBody,
-  });
-};
-
-module.exports = sendEmail;
+module.exports = transporter;
