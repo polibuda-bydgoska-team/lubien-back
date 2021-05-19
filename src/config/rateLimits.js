@@ -1,4 +1,5 @@
 const rateLimit = require("express-rate-limit");
+const slowDown = require("express-slow-down");
 
 exports.limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -15,6 +16,21 @@ exports.createAccountLimiter = rateLimit({
     message:
       "Too many accounts created from this IP, please try again after an hour.",
   },
+});
+
+exports.loginLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 5,
+  message: {
+    message:
+      "Too many failed authentication attempts, please try logging in again later.",
+  },
+});
+
+exports.loginSpeedLimiter = slowDown({
+  windowMs: 5 * 60 * 1000,
+  delayAfter: 5,
+  delayMs: 500,
 });
 
 exports.confirmationEmailResendLimiter = rateLimit({

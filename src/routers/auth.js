@@ -2,7 +2,11 @@ const express = require("express");
 const { signup, login } = require("../controllers/auth");
 const { registerValidator } = require("../validators/authValidator");
 const checkValidation = require("../middleware/checkValidation");
-const { createAccountLimiter } = require("../config/rateLimits");
+const {
+  createAccountLimiter,
+  loginLimiter,
+  loginSpeedLimiter,
+} = require("../config/rateLimits");
 
 const router = express.Router();
 
@@ -13,6 +17,6 @@ router.put(
   checkValidation(),
   signup
 );
-router.post("/login", login);
+router.post("/login", loginLimiter, loginSpeedLimiter, login);
 
 module.exports = router;
