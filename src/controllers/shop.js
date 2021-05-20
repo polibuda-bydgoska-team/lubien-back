@@ -42,8 +42,37 @@ exports.getCheckout = async (req, res, next) => {
       .exec();
     const products = user.cart.items;
 
+    const customer = await stripe.customers.create({
+      address: {
+        city: user.address.city,
+        country: "GB",
+        line1: user.address.street,
+        line2: user.address.houseNumber,
+        state: user.address.county,
+        postal_code: user.address.postCode,
+      },
+      shipping: {
+        address: {
+          line1: user.address.street,
+          city: user.address.city,
+          country: "GB",
+          line2: user.address.houseNumber,
+          postal_code: user.address.postCode,
+          state: user.address.county,
+        },
+        name: user.firstName + " " + user.lastName,
+        phone: user.phone,
+      },
+      email: user.email,
+    });
+
     const session = await stripe.checkout.sessions.create({
+      customer: customer.id,
       payment_method_types: ["card"],
+      shipping_rates: ["shr_1ItBm8L1u3QXvzMjCBOvXpJL"],
+      shipping_address_collection: {
+        allowed_countries: ["GB"],
+      },
       line_items: products.map((p) => {
         return {
           name: p.product.title,
@@ -56,7 +85,6 @@ exports.getCheckout = async (req, res, next) => {
           images: p.product.imagesURL,
         };
       }),
-      customer_email: user.email,
       client_reference_id: user._id.toString(),
       mode: "payment",
       success_url: "http://localhost:3000/checkout?finished=true",
