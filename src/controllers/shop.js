@@ -53,6 +53,7 @@ exports.getCheckout = async (req, res, next) => {
               : p.product.price.extraLarge * 100,
           currency: "GBP",
           quantity: p.quantity,
+          images: p.product.imagesURL,
         };
       }),
       customer_email: user.email,
