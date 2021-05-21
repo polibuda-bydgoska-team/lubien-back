@@ -79,6 +79,10 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    shippingCost: {
+      type: Number,
+      required: true,
+    },
     purchaser: {
       userId: {
         type: mongoose.Schema.Types.ObjectId,

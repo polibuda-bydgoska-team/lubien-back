@@ -2,7 +2,14 @@ const transporter = require("../../config/emailTransporter");
 const clientURI = process.env.CLIENT_URI || "http://localhost:3000";
 const ejs = require("ejs");
 
-const sendOrderEmail = (userEmail, userName, orderId, totalPrice, items) => {
+const sendOrderEmail = (
+  userEmail,
+  userName,
+  orderId,
+  totalPrice,
+  items,
+  shippingCost
+) => {
   const htmlBody = ejs.render(
     `<!doctype html>
   <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -289,7 +296,7 @@ const sendOrderEmail = (userEmail, userName, orderId, totalPrice, items) => {
           <tr>
             <td align="left" style="font-size:0px;padding:15px 15px 0px 15px;word-break:break-word;">
               
-    <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:11px;line-height:1.5;text-align:left;color:#000000;"><p style="text-align: right;"><strong><span style="font-family: Cabin, sans-serif; font-size: 19px;">Total: £${totalPrice}</span></strong></p></div>
+    <div style="font-family:Ubuntu, Helvetica, Arial, sans-serif;font-size:11px;line-height:1.5;text-align:left;color:#000000;"><p style="text-align: right;"><strong><span style="font-family: Cabin, sans-serif; font-size: 19px;">Total: £${totalPrice} (shipping: £${shippingCost})</span></strong></p></div>
   
             </td>
           </tr>
