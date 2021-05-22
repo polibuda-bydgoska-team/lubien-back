@@ -23,6 +23,12 @@ exports.registerValidator = [
     .matches(
       /^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$/
     )
+    .custom((value, { req }) => {
+      if (value !== req.body.email) {
+        throw new Error("Password can't be same as email!");
+      }
+      return true;
+    })
     .withMessage(
       "The password must contain a minimum of eight characters, at least one uppercase letter, one lowercase letter, one number and one special character."
     ),
