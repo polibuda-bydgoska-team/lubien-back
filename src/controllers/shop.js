@@ -41,26 +41,48 @@ exports.getCheckout = async (req, res, next) => {
       .populate("cart.items.product")
       .exec();
     const products = user.cart.items;
+    let subtotal = 0;
+    const lineItems = products.map((p) => {
+      return {
+        name: p.product.title,
+        amount:
+          p.size === "large"
+            ? p.product.price.large * 100
+            : p.product.price.extraLarge * 100,
+        currency: "GBP",
+        quantity: p.quantity,
+        images: p.product.imagesURL,
+      };
+    });
+
+    subtotal = lineItems
+      .map((item) => item.amount * item.quantity)
+      .reduce((prev, next) => prev + next);
+
+    const shipping = {
+      name: "Shipping",
+      amount: 1500,
+      currency: "GBP",
+      quantity: 1,
+      images: ["https://image.flaticon.com/icons/png/512/709/709790.png"],
+    };
+
+    if (subtotal >= 8500) {
+      shipping.name = "Free shipping";
+      shipping.amount = 0;
+    }
+
+    lineItems.push(shipping);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
-      line_items: products.map((p) => {
-        return {
-          name: p.product.title,
-          amount:
-            p.size === "large"
-              ? p.product.price.large * 100
-              : p.product.price.extraLarge * 100,
-          currency: "GBP",
-          quantity: p.quantity,
-          images: p.product.imagesURL,
-        };
-      }),
-      customer_email: user.email,
+      line_items: lineItems,
       client_reference_id: user._id.toString(),
+      customer_email: user.email,
       mode: "payment",
       success_url: "http://localhost:3000/checkout?finished=true",
       cancel_url: "http://localhost:3000/checkout?finished=false",
+      metadata: { shipping: shipping.amount },
     });
 
     res.send({ id: session.id });
@@ -84,26 +106,22 @@ exports.webhook = (req, res, next) => {
   }
 
   if (event.type === "checkout.session.completed") {
-    checkoutSessionCompleted(event.data.object.client_reference_id);
+    checkoutSessionCompleted(
+      event.data.object.client_reference_id,
+      event.data.object.amount_total,
+      event.data.object.metadata.shipping * 1
+    );
   }
 
   res.status(200);
 };
 
-const checkoutSessionCompleted = async (userId) => {
+const checkoutSessionCompleted = async (userId, amountTotal, shippingCost) => {
   try {
     const user = await User.findById(userId)
       .populate("cart.items.product")
       .exec();
-    let total = 0;
     products = user.cart.items;
-    products.forEach((p) => {
-      if (p.size === "large") {
-        total += p.quantity * p.product.price.large;
-      } else {
-        total += p.quantity * p.product.price.extraLarge;
-      }
-    });
     const productsToOrder = user.cart.items.map((i) => {
       return {
         productId: i.product._id,
@@ -133,7 +151,8 @@ const checkoutSessionCompleted = async (userId) => {
     const order = new Order({
       orderId: nanoid(),
       products: productsToOrder,
-      totalPrice: total,
+      totalPrice: amountTotal / 100,
+      shippingCost: shippingCost != 0 ? shippingCost / 100 : 0,
       purchaser: {
         userId: user._id,
         firstName: user.firstName,
@@ -157,7 +176,8 @@ const checkoutSessionCompleted = async (userId) => {
       user.firstName,
       order.orderId,
       order.totalPrice,
-      order.products
+      order.products,
+      order.shippingCost
     );
   } catch (error) {
     console.log(error);
