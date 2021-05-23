@@ -80,8 +80,8 @@ exports.getCheckout = async (req, res, next) => {
       client_reference_id: user._id.toString(),
       customer_email: user.email,
       mode: "payment",
-      success_url: "http://localhost:3000/checkout?finished=true",
-      cancel_url: "http://localhost:3000/checkout?finished=false",
+      success_url: process.env.CLIENT_URI + "/checkout?finished=true",
+      cancel_url: process.env.CLIENT_URI + "/checkout?finished=false",
       metadata: { shipping: shipping.amount },
     });
 
