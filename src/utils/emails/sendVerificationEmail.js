@@ -389,7 +389,7 @@ const sendVerificationEmail = (userEmail, token) => {
 
   transporter.sendMail({
     to: userEmail,
-    from: "adibu8@gmail.com",
+    from: process.env.SERVER_EMAIL,
     subject: "Verify your email address",
     html: htmlBody,
   });

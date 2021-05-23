@@ -399,7 +399,7 @@ const sendResetPswEmail = (userEmail, userId, token) => {
 
   transporter.sendMail({
     to: userEmail,
-    from: "adibu8@gmail.com",
+    from: process.env.SERVER_EMAIL,
     subject: "Password reset",
     html: htmlBody,
   });
