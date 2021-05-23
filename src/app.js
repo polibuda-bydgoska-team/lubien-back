@@ -59,6 +59,7 @@ app.use((req, res, next) => {
     express.json()(req, res, next);
   }
 });
+app.set("trust proxy", 1);
 app.use(helmet());
 app.use(cors());
 app.use(limiter);
