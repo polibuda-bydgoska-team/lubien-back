@@ -755,7 +755,7 @@ const sendOrderEmail = (
 
   transporter.sendMail({
     to: userEmail,
-    from: "adibu8@gmail.com",
+    from: process.env.SERVER_EMAIL,
     subject: "Order confirmation",
     html: htmlBody,
   });
