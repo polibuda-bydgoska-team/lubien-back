@@ -59,6 +59,7 @@ const productSchema = new mongoose.Schema({
       required: true,
     },
   ],
+  showOnHomePage: { type: Boolean, default: false },
 });
 
 module.exports = mongoose.model("Product", productSchema);

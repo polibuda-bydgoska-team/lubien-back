@@ -4,6 +4,7 @@ const paginatedResults = require("../middleware/paginatedResults");
 const {
   getProducts,
   getProduct,
+  getHomePageProducts,
   getCheckout,
   webhook,
 } = require("../controllers/shop");
@@ -15,6 +16,8 @@ const router = express.Router();
 router.get("/products", paginatedResults(Product), getProducts);
 
 router.get("/products/:productId", getProduct);
+
+router.get("/home-products", getHomePageProducts);
 
 router.get("/checkout", isAuth, getCheckout);
 

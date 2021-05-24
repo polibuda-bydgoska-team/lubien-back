@@ -36,6 +36,22 @@ exports.getProduct = async (req, res, next) => {
   }
 };
 
+exports.getHomePageProducts = async (req, res, next) => {
+  try {
+    const products = await Product.find({ showOnHomePage: true });
+
+    if (!products) {
+      createError("Could not find home page products", 404);
+    }
+    return res.status(200).send(products);
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
+};
+
 exports.getCheckout = async (req, res, next) => {
   try {
     const user = await User.findById(req.userId)
