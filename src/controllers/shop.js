@@ -7,6 +7,7 @@ const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 const { customAlphabet } = require("nanoid");
 const nanoid = customAlphabet("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", 6);
 const sendOrderEmail = require("../utils/emails/sendOrderEmail");
+const clientURI = process.env.CLIENT_URI || "http://localhost:3000";
 
 exports.getProducts = async (req, res, next) => {
   try {
@@ -80,8 +81,8 @@ exports.getCheckout = async (req, res, next) => {
       client_reference_id: user._id.toString(),
       customer_email: user.email,
       mode: "payment",
-      success_url: process.env.CLIENT_URI + "/checkout?finished=true",
-      cancel_url: process.env.CLIENT_URI + "/checkout?finished=false",
+      success_url: clientURI + "/checkout?finished=true",
+      cancel_url: clientURI + "/checkout?finished=false",
       metadata: { shipping: shipping.amount },
     });
 
@@ -148,6 +149,27 @@ const checkoutSessionCompleted = async (userId, amountTotal, shippingCost) => {
         imagesURL: i.product.imagesURL,
       };
     });
+
+    for (const p of productsToOrder) {
+      const product = await Product.findById(p.productId);
+      let newQuantity;
+      if (p.size === "large") {
+        newQuantity = product.quantity.large - p.quantity;
+        if (newQuantity < 0) {
+          newQuantity = 0;
+        }
+        product.quantity.large = newQuantity;
+        await product.save();
+      } else {
+        newQuantity = product.quantity.extraLarge - p.quantity;
+        if (newQuantity < 0) {
+          newQuantity = 0;
+        }
+        product.quantity.extraLarge = newQuantity;
+        await product.save();
+      }
+    }
+
     const order = new Order({
       orderId: nanoid(),
       products: productsToOrder,
