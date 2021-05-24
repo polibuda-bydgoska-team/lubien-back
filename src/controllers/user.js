@@ -36,6 +36,22 @@ exports.postCart = async (req, res, next) => {
     if (!product) {
       createError("Could not find product", 404);
     }
+    if (
+      (product.quantity.large <= 0 && productSize === "large") ||
+      (product.quantity.extraLarge <= 0 && productSize === "extraLarge")
+    ) {
+      createError("Currently the product is unavailable, we are sorry.", 400);
+    }
+    if (
+      (productSize === "large" && productQuantity > product.quantity.large) ||
+      (productSize === "extraLarge" &&
+        productQuantity > product.quantity.extraLarge)
+    ) {
+      createError(
+        "The specified quantity of the product is greater than its stock level. We are sorry.",
+        400
+      );
+    }
     const user = await User.findById(req.userId);
     await user.addToCart(product, productSize, productQuantity);
     const updatedUser = await User.findById(req.userId)
@@ -59,6 +75,15 @@ exports.postCartChangeQuantity = async (req, res, next) => {
       const product = await Product.findById(p.productId);
       if (!product) {
         createError("Could not find product", 404);
+      }
+      if (
+        (p.size === "large" && p.addValue > product.quantity.large) ||
+        (p.size === "extraLarge" && p.addValue > product.quantity.extraLarge)
+      ) {
+        createError(
+          "The specified quantity of the product is greater than its stock level. We are sorry.",
+          400
+        );
       }
       if (p.addValue) {
         await user.raiseProductQuantityInCart(product, p.size, p.addValue);
