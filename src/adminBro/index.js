@@ -13,16 +13,10 @@ const sidebarGroups = {
     icon: "User",
   },
   product: {
-    name: "Products Management",
     icon: "Product",
   },
   order: {
-    name: "Orders Management",
-    icon: "Order",
-  },
-  admin: {
-    name: "Admin Users Managment",
-    icon: "User",
+    icon: "Product",
   },
 };
 
@@ -32,26 +26,34 @@ const adminBro = new AdminBro({
       resource: User,
       options: {
         ...userResource,
-        parent: sidebarGroups.user,
+        navigation: sidebarGroups.user,
+        sort: {
+          sortBy: "isVerified",
+          direction: "desc",
+        },
       },
     },
     {
       resource: Product,
       options: {
-        parent: sidebarGroups.product,
+        navigation: sidebarGroups.product,
       },
     },
     {
       resource: Order,
       options: {
         ...orderResource,
-        parent: sidebarGroups.order,
+        navigation: sidebarGroups.order,
+        sort: {
+          sortBy: "createdAt",
+          direction: "desc",
+        },
       },
     },
     {
       resource: Admin,
       options: {
-        parent: sidebarGroups.admin,
+        navigation: sidebarGroups.user,
         properties: {
           encryptedPassword: {
             isVisible: false,
@@ -81,7 +83,11 @@ const adminBro = new AdminBro({
   branding: {
     companyName: "Lubien",
     softwareBrothers: false,
-    logo: false,
+    logo: "https://ik.imagekit.io/lubien/Branding/logo_kcjziZXCCPD.png",
+    favicon: "https://ik.imagekit.io/lubien/Branding/logo_white_XwISseNAp.png",
+  },
+  dashboard: {
+    component: AdminBro.bundle("./components/dashboard.jsx"),
   },
 });
 
