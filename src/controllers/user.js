@@ -145,7 +145,9 @@ exports.getClearCart = async (req, res, next) => {
 
 exports.getOrders = async (req, res, next) => {
   try {
-    const orders = await Order.find({ "purchaser.userId": req.userId });
+    const orders = await Order.find({ "purchaser.userId": req.userId }).sort({
+      createdAt: -1,
+    });
     if (!orders) {
       createError("Could not find orders", 404);
     }
