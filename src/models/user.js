@@ -151,7 +151,9 @@ userSchema.methods.reduceProductQuantityInCart = function (
 
 userSchema.methods.removeFromCart = function (product, size) {
   const cartProductIndex = this.cart.items.findIndex((cp) => {
-    return cp.product.toString() === product._id.toString() && cp.size === size;
+    return (
+      cp.product._id.toString() === product._id.toString() && cp.size === size
+    );
   });
 
   this.cart.items.splice(cartProductIndex, 1);
